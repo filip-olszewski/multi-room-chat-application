@@ -28,7 +28,7 @@ public class AppWindow {
         mainPanel.add(chatScreen, ChatScreen.CHAT_SCREEN_KEY);
 
         frame.add(mainPanel);
-        showScreen(HomeScreen.HOME_SCREEN_KEY);
+        showScreen(ChatScreen.CHAT_SCREEN_KEY);
     }
 
     public void showWindow() {
