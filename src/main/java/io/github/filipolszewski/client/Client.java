@@ -10,6 +10,7 @@ import io.github.filipolszewski.constants.AppConfig;
 import io.github.filipolszewski.uicommands.CreateRoomCommand;
 import io.github.filipolszewski.uicommands.DeleteRoomCommand;
 import io.github.filipolszewski.uicommands.JoinRoomCommand;
+import io.github.filipolszewski.uicommands.LeaveRoomCommand;
 import io.github.filipolszewski.view.AppWindow;
 import lombok.extern.java.Log;
 
@@ -55,6 +56,11 @@ public class Client {
         JoinRoomCommand joinRoomCommand = new JoinRoomCommand(conn, window);
         window.getHomeScreen().addJoinButtonListener(e -> {
             joinRoomCommand.execute();
+        });
+
+        LeaveRoomCommand leaveRoomCommand = new LeaveRoomCommand(conn, window);
+        window.getChatScreen().addLeaveButtonListener(e -> {
+            leaveRoomCommand.execute();
         });
 
         // Try to log in

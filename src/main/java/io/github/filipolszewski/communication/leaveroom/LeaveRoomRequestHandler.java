@@ -19,8 +19,6 @@ public class LeaveRoomRequestHandler implements RequestHandler {
         Response<LeaveRoomPayload> res = null;
 
         // Extract data
-        String roomID = req.payload().roomID();
-
         var user = clientHandler.getUser();
 
         if(user == null) {
@@ -28,11 +26,13 @@ public class LeaveRoomRequestHandler implements RequestHandler {
             return res;
         }
 
+        String roomID = user.getCurrentRoomID();
         String uid = user.getUserID();
 
         // Leave the room
         clientHandler.getRoomManagerRef().leaveRoom(roomID, uid);
-        res = new Response<>("Left the room " + roomID, new LeaveRoomPayload(roomID));
+        user.setCurrentRoomID(null);
+        res = new Response<>("Left the room " + roomID, new LeaveRoomPayload());
 
         return res;
     }

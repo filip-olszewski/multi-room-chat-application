@@ -43,6 +43,10 @@ public class AppWindow {
         return JOptionPane.showInputDialog(mainPanel, message);
     }
 
+    public int displayConfirmDialog(String message) {
+        return JOptionPane.showConfirmDialog(mainPanel, message);
+    }
+
     public void displayErrorDialog(String message) {
         JOptionPane.showMessageDialog(mainPanel, message, "Error", JOptionPane.ERROR_MESSAGE);
     }

@@ -32,6 +32,7 @@ public class JoinRoomRequestHandler implements RequestHandler {
 
         // Check room availability
         boolean ok = clientHandler.getRoomManagerRef().joinRoom(roomID, uid);
+        user.setCurrentRoomID(roomID);
 
         // If ok then send back success
         if(ok) {
