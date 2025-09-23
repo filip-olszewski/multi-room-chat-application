@@ -6,6 +6,12 @@ import io.github.filipolszewski.communication.RequestHandler;
 import io.github.filipolszewski.communication.Response;
 import io.github.filipolszewski.communication.createroom.CreateRoomPayload;
 import io.github.filipolszewski.communication.createroom.CreateRoomRequestHandler;
+import io.github.filipolszewski.communication.deleteroom.DeleteRoomPayload;
+import io.github.filipolszewski.communication.deleteroom.DeleteRoomRequestHandler;
+import io.github.filipolszewski.communication.joinroom.JoinRoomPayload;
+import io.github.filipolszewski.communication.joinroom.JoinRoomRequestHandler;
+import io.github.filipolszewski.communication.leaveroom.LeaveRoomPayload;
+import io.github.filipolszewski.communication.leaveroom.LeaveRoomRequestHandler;
 import io.github.filipolszewski.communication.login.LoginPayload;
 import io.github.filipolszewski.communication.login.LoginRequestHandler;
 import io.github.filipolszewski.connection.SocketConnection;
@@ -41,6 +47,9 @@ public class ClientHandler implements Runnable {
         requestHandlers = new HashMap<>();
         requestHandlers.put(LoginPayload.class, new LoginRequestHandler());
         requestHandlers.put(CreateRoomPayload.class, new CreateRoomRequestHandler());
+        requestHandlers.put(DeleteRoomPayload.class, new DeleteRoomRequestHandler());
+        requestHandlers.put(JoinRoomPayload.class, new JoinRoomRequestHandler());
+        requestHandlers.put(LeaveRoomPayload.class, new LeaveRoomRequestHandler());
 
         this.userManagerRef = userManager;
         this.roomManagerRef = roomManager;

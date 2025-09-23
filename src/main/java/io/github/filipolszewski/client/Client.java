@@ -4,10 +4,12 @@ import io.github.filipolszewski.communication.Payload;
 import io.github.filipolszewski.communication.Request;
 import io.github.filipolszewski.communication.Response;
 import io.github.filipolszewski.communication.login.LoginPayload;
-import io.github.filipolszewski.communication.login.LoginResponseHandler;
 import io.github.filipolszewski.connection.SocketConnection;
 import io.github.filipolszewski.connection.Connection;
 import io.github.filipolszewski.constants.AppConfig;
+import io.github.filipolszewski.uicommands.CreateRoomCommand;
+import io.github.filipolszewski.uicommands.DeleteRoomCommand;
+import io.github.filipolszewski.uicommands.JoinRoomCommand;
 import io.github.filipolszewski.view.AppWindow;
 import lombok.extern.java.Log;
 
@@ -39,12 +41,29 @@ public class Client {
 
         window.showWindow();
 
+        // Register commands
+        CreateRoomCommand createRoomCommand = new CreateRoomCommand(conn, window);
+        window.getHomeScreen().addCreateButtonListener(e -> {
+            createRoomCommand.execute();
+        });
+
+        DeleteRoomCommand deleteRoomCommand = new DeleteRoomCommand(conn, window);
+        window.getHomeScreen().addDeleteButtonListener(e -> {
+            deleteRoomCommand.execute();
+        });
+
+        JoinRoomCommand joinRoomCommand = new JoinRoomCommand(conn, window);
+        window.getHomeScreen().addJoinButtonListener(e -> {
+            joinRoomCommand.execute();
+        });
+
+        // Try to log in
         requestLogin();
 
         while(true) {
             try {
                 Response<? extends Payload> response = conn.recieve();
-                new LoginResponseHandler().handle(response);
+                // new LoginResponseHandler().handle(response);
 
                 log.info(response.toString());
             } catch (IOException | ClassNotFoundException e) {
@@ -76,6 +95,4 @@ public class Client {
             throw new RuntimeException(e);
         }
     }
-
-
 }

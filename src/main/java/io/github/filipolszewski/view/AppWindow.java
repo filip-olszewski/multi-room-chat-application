@@ -40,7 +40,7 @@ public class AppWindow {
     }
 
     public String promptInputDialog(String message) {
-        return JOptionPane.showInputDialog(mainPanel, message, JOptionPane.OK_CANCEL_OPTION);
+        return JOptionPane.showInputDialog(mainPanel, message);
     }
 
     public void displayErrorDialog(String message) {

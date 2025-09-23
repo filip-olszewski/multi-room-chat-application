@@ -29,4 +29,12 @@ public class HomeScreen extends JPanel {
     public void addCreateButtonListener(ActionListener actionListener) {
         createButton.addActionListener(actionListener);
     }
+
+    public void addDeleteButtonListener(ActionListener actionListener) {
+        deleteButton.addActionListener(actionListener);
+    }
+
+    public void addJoinButtonListener(ActionListener actionListener) {
+        joinButton.addActionListener(actionListener);
+    }
 }
