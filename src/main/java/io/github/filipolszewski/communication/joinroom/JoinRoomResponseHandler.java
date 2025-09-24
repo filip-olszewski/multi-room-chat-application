@@ -1,10 +1,20 @@
 package io.github.filipolszewski.communication.joinroom;
 
+import io.github.filipolszewski.client.Client;
 import io.github.filipolszewski.communication.*;
+import io.github.filipolszewski.view.screens.ChatScreen;
 
 public class JoinRoomResponseHandler implements ResponseHandler {
     @Override
-    public void handle(Response<? extends Payload> response) {
+    public void handle(Response<? extends Payload> response, Client client) {
+        var window = client.getWindow();
 
+        if(response.success()) {
+            window.displaySuccessDialog(response.message());
+            window.showScreen(ChatScreen.CHAT_SCREEN_KEY);
+        }
+        else {
+            window.displayErrorDialog(response.message());
+        }
     }
 }

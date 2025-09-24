@@ -2,10 +2,12 @@ package io.github.filipolszewski.model.room;
 
 import io.github.filipolszewski.constants.RoomConfig;
 import lombok.Getter;
+import lombok.ToString;
 
 import java.util.HashSet;
 import java.util.Set;
 
+@ToString
 @Getter
 public class Room {
     private final String roomID;

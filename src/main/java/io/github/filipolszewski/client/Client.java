@@ -3,34 +3,55 @@ package io.github.filipolszewski.client;
 import io.github.filipolszewski.communication.Payload;
 import io.github.filipolszewski.communication.Request;
 import io.github.filipolszewski.communication.Response;
+import io.github.filipolszewski.communication.ResponseHandler;
+import io.github.filipolszewski.communication.createroom.CreateRoomPayload;
+import io.github.filipolszewski.communication.createroom.CreateRoomResponseHandler;
+import io.github.filipolszewski.communication.deleteroom.DeleteRoomPayload;
+import io.github.filipolszewski.communication.deleteroom.DeleteRoomResponseHandler;
+import io.github.filipolszewski.communication.joinroom.JoinRoomPayload;
+import io.github.filipolszewski.communication.joinroom.JoinRoomResponseHandler;
+import io.github.filipolszewski.communication.leaveroom.LeaveRoomPayload;
+import io.github.filipolszewski.communication.leaveroom.LeaveRoomResponseHandler;
 import io.github.filipolszewski.communication.login.LoginPayload;
+import io.github.filipolszewski.communication.login.LoginResponseHandler;
 import io.github.filipolszewski.connection.SocketConnection;
 import io.github.filipolszewski.connection.Connection;
 import io.github.filipolszewski.constants.AppConfig;
+import io.github.filipolszewski.model.user.User;
 import io.github.filipolszewski.uicommands.CreateRoomCommand;
 import io.github.filipolszewski.uicommands.DeleteRoomCommand;
 import io.github.filipolszewski.uicommands.JoinRoomCommand;
 import io.github.filipolszewski.uicommands.LeaveRoomCommand;
 import io.github.filipolszewski.view.AppWindow;
+import lombok.Getter;
 import lombok.extern.java.Log;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.util.HashMap;
+import java.util.Map;
 
 @Log
 public class Client {
 
     private Connection<Request<? extends Payload>, Response<? extends Payload>> conn;
+
+    @Getter
     private final AppWindow window;
+
+    private final Map<Class<? extends Payload>, ResponseHandler> responseHandlers;
+    private User user;
 
     public Client() {
         window = new AppWindow();
+        responseHandlers = new HashMap<>();
+        responseHandlers.put(LoginPayload.class, new LoginResponseHandler());
+        responseHandlers.put(CreateRoomPayload.class, new CreateRoomResponseHandler());
+        responseHandlers.put(DeleteRoomPayload.class, new DeleteRoomResponseHandler());
+        responseHandlers.put(LeaveRoomPayload.class, new LeaveRoomResponseHandler());
+        responseHandlers.put(JoinRoomPayload.class, new JoinRoomResponseHandler());
     }
 
-    /**
-     * Initialize new client side connection
-     * Handle first time login request
-     */
     public void init() {
         try {
             conn = new SocketConnection<>(new Socket(AppConfig.HOST, AppConfig.PORT));
@@ -66,19 +87,41 @@ public class Client {
         // Try to log in
         requestLogin();
 
-        while(true) {
-            try {
-                Response<? extends Payload> response = conn.recieve();
-                // new LoginResponseHandler().handle(response);
-
-                log.info(response.toString());
-            } catch (IOException | ClassNotFoundException e) {
-                throw new RuntimeException(e);
-            }
-        }
+        // Handle incoming responses
+        handleResponse();
     }
 
-    private void requestLogin() {
+    private void handleResponse() {
+        new Thread(() -> {
+            while(true) {
+
+                Response<? extends Payload> response = null;
+
+                try {
+                    response = conn.recieve();
+                } catch (IOException | ClassNotFoundException e) {
+                    throw new RuntimeException(e);
+                }
+
+                log.info("Received response from server");
+
+                ResponseHandler handler = responseHandlers.get(response.payload().getClass());
+                log.info("Handling response...");
+
+
+                if(handler != null) {
+                    handler.handle(response, this);
+                    log.info("Response (" + response + ") has been handled");
+                }
+                else {
+                    log.info("Failed to handle request. Handle not registered for: "
+                            + response.getClass());
+                }
+            }
+        }).start();
+    }
+
+    public void requestLogin() {
         String username = window.promptInputDialog("Please input your username");
 
         // Exit if canceled
@@ -93,6 +136,7 @@ public class Client {
             if(username == null) System.exit(0);
         }
 
+        // Send login request
         Request<LoginPayload> request = new Request<>(new LoginPayload(username));
 
         try {
@@ -100,5 +144,9 @@ public class Client {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public void setLoggedInUser(User user) {
+        this.user = user;
     }
 }

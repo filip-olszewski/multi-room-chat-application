@@ -42,7 +42,7 @@ public class Server {
                 log.info("A new client (" + clientSocket.getRemoteSocketAddress()
                         + ") has successfully been connected.");
 
-                var handler = new ClientHandler(clientSocket, userManager, roomManager);
+                var handler = new ClientHandler(clientSocket, userManager, roomManager, this);
                 clients.add(handler);
                 clientPool.submit(handler);
             }
@@ -50,5 +50,10 @@ public class Server {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public void removeClientHandler(ClientHandler clientHandler) {
+        clients.remove(clientHandler);
+        log.info("Client disconnected " + clientHandler.getUser());
     }
 }

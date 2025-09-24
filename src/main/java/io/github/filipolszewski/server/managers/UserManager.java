@@ -16,11 +16,17 @@ public class UserManager {
     }
 
     public boolean addUser(User user) {
+        System.out.println(user);
         return users.putIfAbsent(user.getUserID(), user) == null;
     }
 
     public boolean removeUser(String userID) {
+        System.out.println(userID);
         return users.remove(userID) != null;
+    }
+
+    public User getUser(String userID) {
+        return users.get(userID);
     }
 
     public Collection<User> getAll() {

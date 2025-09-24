@@ -44,7 +44,11 @@ public class AppWindow {
     }
 
     public int displayConfirmDialog(String message) {
-        return JOptionPane.showConfirmDialog(mainPanel, message);
+        return JOptionPane.showConfirmDialog(mainPanel, message, "Are you sure?", JOptionPane.OK_CANCEL_OPTION);
+    }
+
+    public void displaySuccessDialog(String message) {
+        JOptionPane.showMessageDialog(mainPanel, message, "Success!", JOptionPane.PLAIN_MESSAGE);
     }
 
     public void displayErrorDialog(String message) {

@@ -32,7 +32,7 @@ public class RoomManager {
         if(room == null) return false;
 
         synchronized (room) {
-            if(room.isAdmin(userID) && !room.isEmpty()) {
+            if(room.isAdmin(userID) && room.isEmpty()) {
                 return rooms.remove(roomID, room);
             }
         }

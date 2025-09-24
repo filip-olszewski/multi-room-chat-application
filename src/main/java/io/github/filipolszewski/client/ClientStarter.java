@@ -1,7 +1,11 @@
 package io.github.filipolszewski.client;
 
+import javax.swing.*;
+
 public class ClientStarter {
     public static void main(String[] args) {
-        new Client().init();
+        SwingUtilities.invokeLater(() -> {
+            new Client().init();
+        });
     }
 }

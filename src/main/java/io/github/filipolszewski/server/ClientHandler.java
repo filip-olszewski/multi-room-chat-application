@@ -25,6 +25,7 @@ import lombok.extern.java.Log;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -37,13 +38,14 @@ public class ClientHandler implements Runnable {
     private final Map<Class<? extends Payload>, RequestHandler> requestHandlers;
 
     private final Socket clientSocketRef;
+    private final Server serverRef;
     @Getter private final RoomManager roomManagerRef;
     @Getter private final UserManager userManagerRef;
 
     @Getter @Setter
     private User user;
 
-    public ClientHandler(Socket clientSocket, UserManager userManager, RoomManager roomManager) {
+    public ClientHandler(Socket clientSocket, UserManager userManager, RoomManager roomManager, Server server) {
         requestHandlers = new HashMap<>();
         requestHandlers.put(LoginPayload.class, new LoginRequestHandler());
         requestHandlers.put(CreateRoomPayload.class, new CreateRoomRequestHandler());
@@ -53,6 +55,7 @@ public class ClientHandler implements Runnable {
 
         this.userManagerRef = userManager;
         this.roomManagerRef = roomManager;
+        this.serverRef = server;
         this.clientSocketRef = clientSocket;
 
         try {
@@ -62,48 +65,51 @@ public class ClientHandler implements Runnable {
         }
     }
 
-    /**
-     * Handle reading incoming requests from the clients
-     */
     @Override
     public void run() {
-        while(true) {
-
-            // Receive request
-            Request<?> request = null;
-
-            try {
+        try {
+            while(true) {
+                // Receive request
+                Request<?> request = null;
                 request = conn.recieve();
-            } catch (IOException | ClassNotFoundException e) {
-                throw new RuntimeException(e);
-            }
+                log.info("Received request from client: " + request);
 
-            log.info("Received from client: " + request);
+                // Handle request
+                RequestHandler handler = requestHandlers.get(request.payload().getClass());
+                log.info("Handling request... " + request);
 
+                // Check if there's a handler registered for this request type
+                if(handler == null) {
+                    log.info("Failed to handle request. Handler not registered for: " + request.getClass());
+                    continue;
+                }
 
-            // Handle request
-            RequestHandler handler = requestHandlers.get(request.payload().getClass());
-
-            log.info("Handling request... " + request);
-
-            if(handler != null) {
+                // Handle the request
                 var response = handler.handle(request, this);
 
-                if(response.success()) {
-                    log.info("Request has been handled successfully! " + request);
-                }
-                else {
-                    log.info("Failed to handle request successfully! " + request);
-                }
+                // Log based on response success
+                if(response.success())
+                    log.info("Request has been handled successfully! Responding: " + response);
+                else log.info("Failed to handle request successfully! Responding: " + response);
 
-                try {
-                    conn.send(response);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
+                // Send back the response
+                conn.send(response);
             }
-            else {
-                log.info("Failed to handle request. Handle not registered for: " + request.getClass());
+
+        }
+        catch (SocketException e) {
+            log.info("Client has disconnected.");
+        }
+        catch (IOException | ClassNotFoundException e) {
+            log.severe("An unexpected I/O or deserialization error occurred: " + e.getMessage());
+        }
+        finally {
+            serverRef.removeClientHandler(this);
+
+            if (user != null) {
+                log.info("Logging out user: " + user.getUserID());
+                userManagerRef.removeUser(user.getUserID());
+                roomManagerRef.leaveRoom(user.getCurrentRoomID(), user.getUserID());
             }
         }
     }
