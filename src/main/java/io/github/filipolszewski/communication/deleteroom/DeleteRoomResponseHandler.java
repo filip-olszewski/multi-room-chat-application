@@ -11,20 +11,20 @@ public class DeleteRoomResponseHandler implements ResponseHandler {
     public void handle(Response<? extends Payload> response, Client client) {
         var window = client.getWindow();
 
-        if(response.success()) {
-            window.displaySuccessDialog(response.message());
-
-            final DeleteRoomPayload payload = (DeleteRoomPayload) response.payload();
-            final String roomID = payload.roomID();
-
-            client.getRooms().forEach((policy, roomList) -> {
-                roomList.removeIf(room -> room.getRoomID().equals(roomID));
-            });
-
-            SwingUtilities.invokeLater(client::refreshRoomsList);
-        }
-        else {
+        if(!response.success()) {
             window.displayErrorDialog(response.message());
+            return;
         }
+
+        window.displaySuccessDialog(response.message());
+
+        final DeleteRoomPayload payload = (DeleteRoomPayload) response.payload();
+        final String roomID = payload.roomID();
+
+        client.getRooms().forEach((policy, roomList) -> {
+            roomList.removeIf(room -> room.getRoomID().equals(roomID));
+        });
+
+        SwingUtilities.invokeLater(client::refreshRoomsList);
     }
 }

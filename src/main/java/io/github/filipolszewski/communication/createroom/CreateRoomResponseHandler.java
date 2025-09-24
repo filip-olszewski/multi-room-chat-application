@@ -12,20 +12,20 @@ public class CreateRoomResponseHandler implements ResponseHandler {
     public void handle(Response<? extends Payload> response, Client client) {
         var window = client.getWindow();
 
-        if(response.success()) {
-            // Get payload
-            CreateRoomPayload payload = (CreateRoomPayload) response.payload();
-
-            // Display dialog
-            window.displaySuccessDialog(response.message());
-
-            // Add room to UI
-            SwingUtilities.invokeLater(() -> {
-                client.addRoomListing(payload.roomID());
-            });
-        }
-        else {
+        if(!response.success()) {
             window.displayErrorDialog(response.message());
+            return;
         }
+
+        // Get payload
+        CreateRoomPayload payload = (CreateRoomPayload) response.payload();
+
+        // Display dialog
+        window.displaySuccessDialog(response.message());
+
+        // Add room to UI
+        SwingUtilities.invokeLater(() -> {
+            client.addRoomListing(payload.roomID());
+        });
     }
 }

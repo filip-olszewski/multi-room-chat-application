@@ -9,16 +9,16 @@ public class JoinRoomResponseHandler implements ResponseHandler {
     public void handle(Response<? extends Payload> response, Client client) {
         var window = client.getWindow();
 
-        if(response.success()) {
-            JoinRoomPayload payload = (JoinRoomPayload) response.payload();
-
-            window.displaySuccessDialog(response.message());
-            window.showScreen(ChatScreen.CHAT_SCREEN_KEY);
-
-            client.getUser().setCurrentRoomID(payload.roomID());
-        }
-        else {
+        if(!response.success()) {
             window.displayErrorDialog(response.message());
+            return;
         }
+
+        JoinRoomPayload payload = (JoinRoomPayload) response.payload();
+
+        window.displaySuccessDialog(response.message());
+        window.showScreen(ChatScreen.CHAT_SCREEN_KEY);
+
+        client.getUser().setCurrentRoomID(payload.roomID());
     }
 }
