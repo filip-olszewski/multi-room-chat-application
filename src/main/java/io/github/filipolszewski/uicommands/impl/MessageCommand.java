@@ -1,31 +1,26 @@
-package io.github.filipolszewski.uicommands;
+package io.github.filipolszewski.uicommands.impl;
 
 import io.github.filipolszewski.communication.Payload;
 import io.github.filipolszewski.communication.Request;
 import io.github.filipolszewski.communication.Response;
 import io.github.filipolszewski.communication.message.MessagePayload;
 import io.github.filipolszewski.connection.Connection;
+import io.github.filipolszewski.uicommands.ParamCommand;
 import io.github.filipolszewski.view.AppWindow;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 
 import java.io.IOException;
 
 @Log
-public class MessageCommand implements Command {
+@RequiredArgsConstructor
+public class MessageCommand implements ParamCommand<String> {
 
     private final Connection<Request<? extends Payload>, Response<? extends Payload>> conn;
     private final AppWindow window;
-    private final String userID;
 
-    public MessageCommand(Connection<Request<? extends Payload>, Response<? extends Payload>> conn,
-                          AppWindow window,
-                          String userID) {
-        this.conn = conn;
-        this.window = window;
-        this.userID = userID;
-    }
-
-    public void execute() {
+    @Override
+    public void execute(String userID) {
         String message = window.getChatScreen().getInputText();
         if(message == null || message.trim().isEmpty()) return;
 

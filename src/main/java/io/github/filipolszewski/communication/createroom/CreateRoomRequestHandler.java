@@ -4,8 +4,6 @@ import io.github.filipolszewski.communication.Payload;
 import io.github.filipolszewski.communication.Request;
 import io.github.filipolszewski.communication.RequestHandler;
 import io.github.filipolszewski.communication.Response;
-import io.github.filipolszewski.model.room.Room;
-import io.github.filipolszewski.model.room.RoomPrivacyPolicy;
 import io.github.filipolszewski.server.ClientHandler;
 import io.github.filipolszewski.server.managers.RoomManager;
 

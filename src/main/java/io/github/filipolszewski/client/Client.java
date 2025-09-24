@@ -8,6 +8,8 @@ import io.github.filipolszewski.communication.createroom.CreateRoomPayload;
 import io.github.filipolszewski.communication.createroom.CreateRoomResponseHandler;
 import io.github.filipolszewski.communication.deleteroom.DeleteRoomPayload;
 import io.github.filipolszewski.communication.deleteroom.DeleteRoomResponseHandler;
+import io.github.filipolszewski.communication.fetchrooms.FetchRoomsPayload;
+import io.github.filipolszewski.communication.fetchrooms.FetchRoomsResponseHandler;
 import io.github.filipolszewski.communication.joinroom.JoinRoomPayload;
 import io.github.filipolszewski.communication.joinroom.JoinRoomResponseHandler;
 import io.github.filipolszewski.communication.leaveroom.LeaveRoomPayload;
@@ -19,15 +21,21 @@ import io.github.filipolszewski.communication.message.MessageResponseHandler;
 import io.github.filipolszewski.connection.SocketConnection;
 import io.github.filipolszewski.connection.Connection;
 import io.github.filipolszewski.constants.AppConfig;
+import io.github.filipolszewski.constants.RoomPrivacyPolicy;
+import io.github.filipolszewski.model.room.Room;
 import io.github.filipolszewski.model.user.User;
 import io.github.filipolszewski.uicommands.*;
+import io.github.filipolszewski.uicommands.impl.*;
 import io.github.filipolszewski.view.AppWindow;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.java.Log;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Log
@@ -36,17 +44,27 @@ public class Client {
     private final Map<Class<? extends Payload>, ResponseHandler> responseHandlers;
     @Getter private Connection<Request<? extends Payload>, Response<? extends Payload>> conn;
     @Getter private final AppWindow window;
-    @Getter private User user;
+    @Getter private final CommandRegistry commandRegistry;
+
+    @Getter @Setter
+    private User user;
+
+    @Getter
+    private Map<RoomPrivacyPolicy, List<Room>> rooms;
 
     public Client() {
         window = new AppWindow();
         responseHandlers = new HashMap<>();
+        rooms = new HashMap<>();
+        commandRegistry = new CommandRegistry();
+
         responseHandlers.put(LoginPayload.class, new LoginResponseHandler());
         responseHandlers.put(CreateRoomPayload.class, new CreateRoomResponseHandler());
         responseHandlers.put(DeleteRoomPayload.class, new DeleteRoomResponseHandler());
         responseHandlers.put(LeaveRoomPayload.class, new LeaveRoomResponseHandler());
         responseHandlers.put(JoinRoomPayload.class, new JoinRoomResponseHandler());
         responseHandlers.put(MessagePayload.class, new MessageResponseHandler());
+        responseHandlers.put(FetchRoomsPayload.class, new FetchRoomsResponseHandler());
     }
 
     public void init() {
@@ -60,26 +78,11 @@ public class Client {
 
         window.showWindow();
 
-        // Register commands
-        CreateRoomCommand createRoomCommand = new CreateRoomCommand(conn, window);
-        window.getHomeScreen().addCreateButtonListener(e -> {
-            createRoomCommand.execute();
-        });
+        // Register all commands
+        registerCommands();
 
-        DeleteRoomCommand deleteRoomCommand = new DeleteRoomCommand(conn, window);
-        window.getHomeScreen().addDeleteButtonListener(e -> {
-            deleteRoomCommand.execute();
-        });
-
-        JoinRoomCommand joinRoomCommand = new JoinRoomCommand(conn, window);
-        window.getHomeScreen().addJoinButtonListener(e -> {
-            joinRoomCommand.execute();
-        });
-
-        LeaveRoomCommand leaveRoomCommand = new LeaveRoomCommand(conn, window);
-        window.getChatScreen().addLeaveButtonListener(e -> {
-            leaveRoomCommand.execute();
-        });
+        // Add action listener to trigger commands
+        bindUIActions();
 
         // Try to log in
         requestLogin();
@@ -103,12 +106,10 @@ public class Client {
 
                 log.info("Received response from server");
 
-
                 // Get a handler to handle the response
                 ResponseHandler handler = responseHandlers.get(response.payload().getClass());
 
                 log.info("Handling response...");
-
 
                 // Handle the response
                 if(handler != null) {
@@ -148,7 +149,58 @@ public class Client {
         }
     }
 
-    public void setLoggedInUser(User user) {
-        this.user = user;
+    /**
+     * Register all the commands to the registry
+     */
+    private void registerCommands() {
+        commandRegistry.register(CreateRoomCommand.class, new CreateRoomCommand(conn, window));
+        commandRegistry.register(DeleteRoomCommand.class, new DeleteRoomCommand(conn, window));
+        commandRegistry.register(JoinRoomCommand.class, new JoinRoomCommand(conn, window));
+        commandRegistry.register(LeaveRoomCommand.class, new LeaveRoomCommand(conn, window));
+        commandRegistry.register(MessageCommand.class, new MessageCommand(conn, window));
+        commandRegistry.register(FetchRoomsCommand.class, new FetchRoomsCommand(conn, window));
+    }
+
+    private void bindUIActions() {
+        // Register add button with create room command
+        window.getHomeScreen().addCreateButtonListener(e -> {
+           commandRegistry.getNoArgs(CreateRoomCommand.class).execute();
+        });
+
+        // Register delete button with delete room command
+        window.getHomeScreen().addDeleteButtonListener(e -> {
+            commandRegistry.getNoArgs(DeleteRoomCommand.class).execute();
+        });
+
+        // Register join button with join room command
+        window.getHomeScreen().addJoinButtonListener(e -> {
+            commandRegistry.getNoArgs(JoinRoomCommand.class).execute();
+        });
+
+        // Register leave button with leave room command
+        window.getChatScreen().addLeaveButtonListener(e -> {
+            commandRegistry.getNoArgs(LeaveRoomCommand.class).execute();
+        });
+
+        // Register refresh button with fetch rooms command
+        window.getHomeScreen().addRefreshButtonListener(e -> {
+            commandRegistry.getParam(FetchRoomsCommand.class).execute(RoomPrivacyPolicy.PUBLIC);
+        });
+
+        // Register send button with message command
+        window.getChatScreen().addSendButtonActionListener(e -> {
+            commandRegistry.getParam(MessageCommand.class).execute(user.getUserID());
+        });
+    }
+
+    public void addRoomListing(String roomID) {
+        window.getHomeScreen().addRoomListing(roomID, e -> {
+            commandRegistry.getParam(JoinRoomCommand.class).execute(roomID);
+        });
+    }
+
+    public void refreshRoomsList() {
+        window.getHomeScreen().clearRoomListings();
+        rooms.get(RoomPrivacyPolicy.PUBLIC).forEach(r -> addRoomListing(r.getRoomID()));
     }
 }

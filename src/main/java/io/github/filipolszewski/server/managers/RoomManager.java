@@ -1,8 +1,10 @@
 package io.github.filipolszewski.server.managers;
 
 import io.github.filipolszewski.model.room.Room;
-import io.github.filipolszewski.model.room.RoomPrivacyPolicy;
+import io.github.filipolszewski.constants.RoomPrivacyPolicy;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -62,6 +64,24 @@ public class RoomManager {
 
     public Room getRoom(String roomID) {
         return rooms.get(roomID);
+    }
+
+    public Collection<Room> getAll() {
+        return Collections.unmodifiableCollection(rooms.values());
+    }
+
+    public Collection<Room> getAll(RoomPrivacyPolicy privacy) {
+
+        if(privacy == RoomPrivacyPolicy.ANY) {
+            return getAll();
+        }
+
+        Collection<Room> publicRooms = rooms.values()
+                .stream()
+                .filter(room -> room.getPrivacy() == privacy)
+                .toList();
+
+        return publicRooms;
     }
 
 }

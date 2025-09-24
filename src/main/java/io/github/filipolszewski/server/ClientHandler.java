@@ -8,6 +8,8 @@ import io.github.filipolszewski.communication.createroom.CreateRoomPayload;
 import io.github.filipolszewski.communication.createroom.CreateRoomRequestHandler;
 import io.github.filipolszewski.communication.deleteroom.DeleteRoomPayload;
 import io.github.filipolszewski.communication.deleteroom.DeleteRoomRequestHandler;
+import io.github.filipolszewski.communication.fetchrooms.FetchRoomsPayload;
+import io.github.filipolszewski.communication.fetchrooms.FetchRoomsRequestHandler;
 import io.github.filipolszewski.communication.joinroom.JoinRoomPayload;
 import io.github.filipolszewski.communication.joinroom.JoinRoomRequestHandler;
 import io.github.filipolszewski.communication.leaveroom.LeaveRoomPayload;
@@ -55,6 +57,7 @@ public class ClientHandler implements Runnable {
         requestHandlers.put(JoinRoomPayload.class, new JoinRoomRequestHandler());
         requestHandlers.put(LeaveRoomPayload.class, new LeaveRoomRequestHandler());
         requestHandlers.put(MessagePayload.class, new MessageRequestHandler());
+        requestHandlers.put(FetchRoomsPayload.class, new FetchRoomsRequestHandler());
 
         this.userManager = userManager;
         this.roomManager = roomManager;
