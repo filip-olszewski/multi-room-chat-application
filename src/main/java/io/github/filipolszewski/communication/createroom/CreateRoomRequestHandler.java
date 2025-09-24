@@ -24,7 +24,7 @@ public class CreateRoomRequestHandler implements RequestHandler {
         }
 
         // Check room availability
-        boolean ok = rm.createAndJoinRoom(payload.roomID(), uid, payload.capacity(), payload.privacy());
+        boolean ok = rm.createRoom(payload.roomID(), uid, payload.capacity(), payload.privacy());
 
         // If ok then send back success, else send failure
         if(ok) {

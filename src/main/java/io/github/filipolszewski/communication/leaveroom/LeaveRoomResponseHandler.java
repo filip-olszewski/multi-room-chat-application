@@ -16,6 +16,8 @@ public class LeaveRoomResponseHandler implements ResponseHandler {
             window.getChatScreen().clearChat();
             window.showScreen(HomeScreen.HOME_SCREEN_KEY);
             window.displaySuccessDialog(response.message());
+
+            client.getUser().setCurrentRoomID(null);
         }
         else {
             window.displayErrorDialog(response.message());

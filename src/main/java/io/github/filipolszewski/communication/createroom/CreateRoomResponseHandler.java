@@ -16,9 +16,8 @@ public class CreateRoomResponseHandler implements ResponseHandler {
             // Get payload
             CreateRoomPayload payload = (CreateRoomPayload) response.payload();
 
-            // Display dialog and change the screen
+            // Display dialog
             window.displaySuccessDialog(response.message());
-            window.showScreen(ChatScreen.CHAT_SCREEN_KEY);
 
             // Add room to UI
             SwingUtilities.invokeLater(() -> {
