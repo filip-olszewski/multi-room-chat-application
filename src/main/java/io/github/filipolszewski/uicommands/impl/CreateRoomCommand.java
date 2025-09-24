@@ -20,7 +20,10 @@ public class CreateRoomCommand implements NoArgsCommand {
     @Override
     public void execute() {
         String roomID = window.promptInputDialog("Enter new room ID");
-        if(roomID == null) return;
+        if(roomID == null || roomID.trim().isEmpty()) {
+            window.displayErrorDialog("Room name cannot be empty");
+            return;
+        }
 
         Request<CreateRoomPayload> req = new Request<>(new CreateRoomPayload(roomID));
 
