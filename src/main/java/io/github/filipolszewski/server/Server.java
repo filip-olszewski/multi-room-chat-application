@@ -1,6 +1,10 @@
 package io.github.filipolszewski.server;
 
+import io.github.filipolszewski.communication.Response;
+import io.github.filipolszewski.communication.message.MessagePayload;
 import io.github.filipolszewski.constants.AppConfig;
+import io.github.filipolszewski.model.room.Room;
+import io.github.filipolszewski.model.user.User;
 import io.github.filipolszewski.server.managers.RoomManager;
 import io.github.filipolszewski.server.managers.UserManager;
 import lombok.extern.java.Log;
@@ -9,6 +13,8 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executors;
 
@@ -17,10 +23,10 @@ public class Server {
 
     private final UserManager userManager;
     private final RoomManager roomManager;
-    private final List<ClientHandler> clients;
+    private final Map<String, ClientHandler> clients;
 
     public Server() {
-        clients = new CopyOnWriteArrayList<>();
+        clients = new ConcurrentHashMap<>();
         userManager = new UserManager();
         roomManager = new RoomManager();
     }
@@ -43,7 +49,6 @@ public class Server {
                         + ") has successfully been connected.");
 
                 var handler = new ClientHandler(clientSocket, userManager, roomManager, this);
-                clients.add(handler);
                 clientPool.submit(handler);
             }
 
@@ -52,8 +57,23 @@ public class Server {
         }
     }
 
-    public void removeClientHandler(ClientHandler clientHandler) {
-        clients.remove(clientHandler);
-        log.info("Client disconnected " + clientHandler.getUser());
+    public void removeClientHandler(String userID) {
+        clients.remove(userID);
+    }
+
+    public void addClientHandler(String userID, ClientHandler clientHandler) {
+        clients.putIfAbsent(userID, clientHandler);
+    }
+
+    public ClientHandler getClientHandler(String userID) {
+        return clients.get(userID);
+    }
+
+    public void broadcastRoom(String roomID, String senderID, String message) throws IOException {
+        for(String userID : roomManager.getRoom(roomID).getActiveUsers()) {
+            if(userID.equals(senderID)) continue;
+            var client = clients.get(userID);
+            client.getConn().send(new Response<>(null, new MessagePayload(message, senderID)));
+        }
     }
 }

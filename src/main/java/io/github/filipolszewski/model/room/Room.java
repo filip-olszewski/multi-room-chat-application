@@ -1,6 +1,7 @@
 package io.github.filipolszewski.model.room;
 
 import io.github.filipolszewski.constants.RoomConfig;
+import io.github.filipolszewski.server.managers.UserManager;
 import lombok.Getter;
 import lombok.ToString;
 
@@ -66,5 +67,4 @@ public class Room {
     public synchronized void leaveRoom(String userID) {
         activeUsers.remove(userID);
     }
-
 }

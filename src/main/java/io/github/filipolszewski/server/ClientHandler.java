@@ -14,6 +14,8 @@ import io.github.filipolszewski.communication.leaveroom.LeaveRoomPayload;
 import io.github.filipolszewski.communication.leaveroom.LeaveRoomRequestHandler;
 import io.github.filipolszewski.communication.login.LoginPayload;
 import io.github.filipolszewski.communication.login.LoginRequestHandler;
+import io.github.filipolszewski.communication.message.MessagePayload;
+import io.github.filipolszewski.communication.message.MessageRequestHandler;
 import io.github.filipolszewski.connection.SocketConnection;
 import io.github.filipolszewski.connection.Connection;
 import io.github.filipolszewski.model.user.User;
@@ -38,12 +40,12 @@ public class ClientHandler implements Runnable {
     private final Map<Class<? extends Payload>, RequestHandler> requestHandlers;
 
     private final Socket clientSocketRef;
-    private final Server serverRef;
-    @Getter private final RoomManager roomManagerRef;
-    @Getter private final UserManager userManagerRef;
+    @Getter private final Server server;
+    @Getter private final RoomManager roomManager;
+    @Getter private final UserManager userManager;
 
     @Getter @Setter
-    private User user;
+    private String userID;
 
     public ClientHandler(Socket clientSocket, UserManager userManager, RoomManager roomManager, Server server) {
         requestHandlers = new HashMap<>();
@@ -52,10 +54,11 @@ public class ClientHandler implements Runnable {
         requestHandlers.put(DeleteRoomPayload.class, new DeleteRoomRequestHandler());
         requestHandlers.put(JoinRoomPayload.class, new JoinRoomRequestHandler());
         requestHandlers.put(LeaveRoomPayload.class, new LeaveRoomRequestHandler());
+        requestHandlers.put(MessagePayload.class, new MessageRequestHandler());
 
-        this.userManagerRef = userManager;
-        this.roomManagerRef = roomManager;
-        this.serverRef = server;
+        this.userManager = userManager;
+        this.roomManager = roomManager;
+        this.server = server;
         this.clientSocketRef = clientSocket;
 
         try {
@@ -104,12 +107,15 @@ public class ClientHandler implements Runnable {
             log.severe("An unexpected I/O or deserialization error occurred: " + e.getMessage());
         }
         finally {
-            serverRef.removeClientHandler(this);
+            server.removeClientHandler(userID);
 
-            if (user != null) {
-                log.info("Logging out user: " + user.getUserID());
-                userManagerRef.removeUser(user.getUserID());
-                roomManagerRef.leaveRoom(user.getCurrentRoomID(), user.getUserID());
+            if (userID != null && userManager.getUser(userID) != null) {
+                User u = userManager.getUser(userID);
+
+                userManager.removeUser(userID);
+                roomManager.leaveRoom(u.getCurrentRoomID(), userID);
+
+                log.info("Logging out user: " + userID);
             }
         }
     }

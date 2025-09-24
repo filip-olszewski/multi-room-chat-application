@@ -9,50 +9,29 @@ import io.github.filipolszewski.server.ClientHandler;
 public class DeleteRoomRequestHandler implements RequestHandler {
     @Override
     public Response<DeleteRoomPayload> handle(Request<? extends Payload> request, ClientHandler clientHandler) {
-        // Get payload
-        DeleteRoomPayload payload = (DeleteRoomPayload) request.payload();
 
-        // Prepare response
-        Response<DeleteRoomPayload> res = null;
-
-        // Get room id from the request
-        String roomID = payload.roomID();
-
-        // Get user from the server
-        var user = clientHandler.getUser();
+        // Get payload and data
+        final DeleteRoomPayload payload = (DeleteRoomPayload) request.payload();
+        final String roomID = payload.roomID();
+        final String uid = clientHandler.getUserID();
 
         // Fail if user not registered
-        if(user == null) {
-            res = new Response<>(false,
-                    "Failure. You need to be logged in to delete a room",
-                    new DeleteRoomPayload(roomID));
-            return res;
+        if(uid == null) {
+            return new Response<>(false,
+                    "Failure. You need to be logged in to delete a room", payload);
         }
-
-        // Get userID
-        String uid = user.getUserID();
-
-        System.out.println(uid);
-        System.out.println(roomID);
 
         // Try to delete the room
-        boolean ok = clientHandler.getRoomManagerRef().removeRoom(roomID, uid);
+        boolean ok = clientHandler.getRoomManager().removeRoom(roomID, uid);
 
-        System.out.println(ok);
-
-        // If possible, send success
+        // If ok send success, else send failure
         if(ok) {
-            res = new Response<>(
-                    "Successfully deleted room " + roomID,
-                    new DeleteRoomPayload(roomID));
+            return new Response<>("Successfully deleted room " + roomID, payload);
         }
-        // Else send failure
         else {
-            res = new Response<>(false,
+            return new Response<>(false,
                     "Failed to delete room " + roomID,
-                    new DeleteRoomPayload(roomID));
+                    payload);
         }
-
-        return res;
     }
 }

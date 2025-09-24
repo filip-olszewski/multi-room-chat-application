@@ -10,58 +10,33 @@ import io.github.filipolszewski.server.ClientHandler;
 import io.github.filipolszewski.server.managers.RoomManager;
 
 public class CreateRoomRequestHandler implements RequestHandler {
-    @SuppressWarnings("unchecked")
     @Override
     public Response<CreateRoomPayload> handle(Request<? extends Payload> request, ClientHandler clientHandler) {
-        // Get payload
-        CreateRoomPayload payload = (CreateRoomPayload) request.payload();
 
-        // Prepare response
-        Response<CreateRoomPayload> res = null;
-
-        // Extract data
-        String roomID =             payload.roomID();
-        int capacity =              payload.capacity();
-        RoomPrivacyPolicy privacy = payload.privacy();
-
-        // Get user from the server
-        var user = clientHandler.getUser();
+        // Get payload and data
+        final CreateRoomPayload payload = (CreateRoomPayload) request.payload();
+        final String uid = clientHandler.getUserID();
+        final RoomManager rm = clientHandler.getRoomManager();
 
         // Fail if user not registered
-        if(user == null) {
-            res = new Response<>(false, "Failure. You need to be logged in to create a room", null);
-            return res;
+        if(uid == null) {
+            return new Response<>(false,
+                    "Failure. You need to be logged in to create a room",
+                    payload);
         }
-
-        // Get user ID
-        String uid = user.getUserID();
-
-        // Get room manager
-        RoomManager rm = clientHandler.getRoomManagerRef();
-
 
         // Check room availability
-        boolean ok = rm.addRoom(new Room(roomID, uid, capacity, privacy));
+        boolean ok = rm.createAndJoinRoom(payload.roomID(), uid, payload.capacity(), payload.privacy());
 
-        // Create room payload
-        var roomPayload = new CreateRoomPayload(roomID, capacity, privacy);
-
-
-        // If ok then send back success, join the room
+        // If ok then send back success, else send failure
         if(ok) {
-            res = new Response<>(
-                    "Successfully created new room " + roomID,
-                    roomPayload);
-            rm.joinRoom(roomID, uid);
-            user.setCurrentRoomID(roomID);
+            clientHandler.getUserManager().getUser(uid).setCurrentRoomID(payload.roomID());
+            return new Response<>("Successfully created new room " + payload.roomID(), payload);
         }
-        // If not send failure
         else {
-            res = new Response<>(false,
+            return new Response<>(false,
                     "Failed to create the room. Room with this ID already exists!",
-                    roomPayload);
+                    payload);
         }
-
-        return res;
     }
 }

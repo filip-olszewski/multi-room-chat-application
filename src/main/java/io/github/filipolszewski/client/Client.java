@@ -14,14 +14,13 @@ import io.github.filipolszewski.communication.leaveroom.LeaveRoomPayload;
 import io.github.filipolszewski.communication.leaveroom.LeaveRoomResponseHandler;
 import io.github.filipolszewski.communication.login.LoginPayload;
 import io.github.filipolszewski.communication.login.LoginResponseHandler;
+import io.github.filipolszewski.communication.message.MessagePayload;
+import io.github.filipolszewski.communication.message.MessageResponseHandler;
 import io.github.filipolszewski.connection.SocketConnection;
 import io.github.filipolszewski.connection.Connection;
 import io.github.filipolszewski.constants.AppConfig;
 import io.github.filipolszewski.model.user.User;
-import io.github.filipolszewski.uicommands.CreateRoomCommand;
-import io.github.filipolszewski.uicommands.DeleteRoomCommand;
-import io.github.filipolszewski.uicommands.JoinRoomCommand;
-import io.github.filipolszewski.uicommands.LeaveRoomCommand;
+import io.github.filipolszewski.uicommands.*;
 import io.github.filipolszewski.view.AppWindow;
 import lombok.Getter;
 import lombok.extern.java.Log;
@@ -34,13 +33,10 @@ import java.util.Map;
 @Log
 public class Client {
 
-    private Connection<Request<? extends Payload>, Response<? extends Payload>> conn;
-
-    @Getter
-    private final AppWindow window;
-
     private final Map<Class<? extends Payload>, ResponseHandler> responseHandlers;
-    private User user;
+    @Getter private Connection<Request<? extends Payload>, Response<? extends Payload>> conn;
+    @Getter private final AppWindow window;
+    @Getter private User user;
 
     public Client() {
         window = new AppWindow();
@@ -50,6 +46,7 @@ public class Client {
         responseHandlers.put(DeleteRoomPayload.class, new DeleteRoomResponseHandler());
         responseHandlers.put(LeaveRoomPayload.class, new LeaveRoomResponseHandler());
         responseHandlers.put(JoinRoomPayload.class, new JoinRoomResponseHandler());
+        responseHandlers.put(MessagePayload.class, new MessageResponseHandler());
     }
 
     public void init() {
@@ -95,6 +92,7 @@ public class Client {
         new Thread(() -> {
             while(true) {
 
+                // Try to read incoming response
                 Response<? extends Payload> response = null;
 
                 try {
@@ -105,10 +103,14 @@ public class Client {
 
                 log.info("Received response from server");
 
+
+                // Get a handler to handle the response
                 ResponseHandler handler = responseHandlers.get(response.payload().getClass());
+
                 log.info("Handling response...");
 
 
+                // Handle the response
                 if(handler != null) {
                     handler.handle(response, this);
                     log.info("Response (" + response + ") has been handled");

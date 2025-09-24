@@ -5,38 +5,36 @@ import io.github.filipolszewski.communication.Request;
 import io.github.filipolszewski.communication.RequestHandler;
 import io.github.filipolszewski.communication.Response;
 import io.github.filipolszewski.communication.joinroom.JoinRoomPayload;
+import io.github.filipolszewski.model.user.User;
 import io.github.filipolszewski.server.ClientHandler;
+import io.github.filipolszewski.server.managers.UserManager;
 
 public class LeaveRoomRequestHandler implements RequestHandler {
     @Override
     public Response<LeaveRoomPayload> handle(Request<? extends Payload> request, ClientHandler clientHandler) {
-        // Prepare response
-        Response<LeaveRoomPayload> res = null;
 
-        // Get user from the server
-        var user = clientHandler.getUser();
+        // Get payload and data
+        final LeaveRoomPayload payload = (LeaveRoomPayload) request.payload();
+        final String uid = clientHandler.getUserID();
 
         // Fail if user not registered
-        if(user == null) {
-            res = new Response<>(false,
+        if(uid == null) {
+            return new Response<>(false,
                     "Failure. You need to be logged in to join a room",
-                    new LeaveRoomPayload());
-            return res;
+                    payload);
         }
 
-        // Get current roomID and userID
-        String roomID = user.getCurrentRoomID();
-        String uid = user.getUserID();
+        // Get current roomID and user
+        final User user = clientHandler.getUserManager().getUser(uid);
+        final String roomID = user.getCurrentRoomID();
 
         // Leave the room
-        clientHandler.getRoomManagerRef().leaveRoom(roomID, uid);
+        clientHandler.getRoomManager().leaveRoom(roomID, uid);
 
         // Clear the room user is currently in
         user.setCurrentRoomID(null);
 
         // Send back success
-        res = new Response<>("Left the room " + roomID, new LeaveRoomPayload());
-
-        return res;
+        return new Response<>("Left the room " + roomID, payload);
     }
 }

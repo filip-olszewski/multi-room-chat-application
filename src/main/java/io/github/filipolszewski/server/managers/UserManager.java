@@ -16,12 +16,14 @@ public class UserManager {
     }
 
     public boolean addUser(User user) {
-        System.out.println(user);
         return users.putIfAbsent(user.getUserID(), user) == null;
     }
 
+    public User getOrAddUser(String userID) {
+        return users.computeIfAbsent(userID, User::new);
+    }
+
     public boolean removeUser(String userID) {
-        System.out.println(userID);
         return users.remove(userID) != null;
     }
 

@@ -1,6 +1,7 @@
 package io.github.filipolszewski.server.managers;
 
 import io.github.filipolszewski.model.room.Room;
+import io.github.filipolszewski.model.room.RoomPrivacyPolicy;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -12,13 +13,17 @@ public class RoomManager {
         rooms = new ConcurrentHashMap<>();
     }
 
-    /**
-     * Adds a new room to the room list
-     * @param room  A new room object
-     * @return      True if successfully added, false otherwise
-     */
-    public boolean addRoom(Room room) {
-        return rooms.putIfAbsent(room.getRoomID(), room) == null;
+    public boolean createRoom(String roomID, String adminID, int capacity, RoomPrivacyPolicy privacy) {
+        return rooms.putIfAbsent(roomID, new Room(roomID, adminID, capacity, privacy)) == null;
+    }
+
+    public synchronized boolean createAndJoinRoom(String roomID, String adminID, int capacity, RoomPrivacyPolicy privacy) {
+        Room room = new Room(roomID, adminID, capacity, privacy);
+
+        if(rooms.containsKey(roomID)) return false;
+
+        rooms.put(roomID, room);
+        return room.joinRoom(adminID);
     }
 
     /**
@@ -54,4 +59,9 @@ public class RoomManager {
             room.leaveRoom(userID);
         }
     }
+
+    public Room getRoom(String roomID) {
+        return rooms.get(roomID);
+    }
+
 }
