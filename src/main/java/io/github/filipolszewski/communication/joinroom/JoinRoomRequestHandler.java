@@ -5,7 +5,11 @@ import io.github.filipolszewski.communication.Request;
 import io.github.filipolszewski.communication.RequestHandler;
 import io.github.filipolszewski.communication.Response;
 import io.github.filipolszewski.server.ClientHandler;
+import lombok.extern.java.Log;
 
+import java.io.IOException;
+
+@Log
 public class JoinRoomRequestHandler implements RequestHandler {
     @Override
     public Response<JoinRoomPayload> handle(Request<? extends Payload> request, ClientHandler clientHandler) {
@@ -26,6 +30,13 @@ public class JoinRoomRequestHandler implements RequestHandler {
 
         // If ok then send back success and set current room for server side user
         if(ok) {
+            // Broadcast joining to others
+            try {
+                clientHandler.getServer().broadcastRoom(roomID, uid + " has joined the room.");
+            } catch (IOException e) {
+                log.severe("Could not broadcast the message");
+            }
+
             clientHandler.getUserManager().getUser(uid).setCurrentRoomID(roomID);
             return new Response<>("Successfully joined the room " + roomID, payload);
         }

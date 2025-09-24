@@ -69,11 +69,33 @@ public class Server {
         return clients.get(userID);
     }
 
+    /**
+     * User version of the broadcast method (Takes in the sender)
+     * Sends back a response with message payload (broadcasts) to all the clients but the sender
+     * @param roomID        ID of the room to broadcast the message in
+     * @param senderID      ID of person sending the message
+     * @param message       The message itself
+     * @throws IOException  IOException If an I/O error occurs during the write operation
+     */
     public void broadcastRoom(String roomID, String senderID, String message) throws IOException {
         for(String userID : roomManager.getRoom(roomID).getActiveUsers()) {
             if(userID.equals(senderID)) continue;
             var client = clients.get(userID);
             client.getConn().send(new Response<>(null, new MessagePayload(message, senderID)));
+        }
+    }
+
+    /**
+     * System version of the broadcast method (No sender, sent by system)
+     * Sends back a response with message payload (broadcasts) to all the clients
+     * @param roomID        ID of the room to broadcast the message in
+     * @param message       The message itself
+     * @throws IOException  IOException If an I/O error occurs during the write operation
+     */
+    public void broadcastRoom(String roomID, String message) throws IOException {
+        for(String userID : roomManager.getRoom(roomID).getActiveUsers()) {
+            var client = clients.get(userID);
+            client.getConn().send(new Response<>(null, new MessagePayload(message, true)));
         }
     }
 }

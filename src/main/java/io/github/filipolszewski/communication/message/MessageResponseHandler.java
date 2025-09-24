@@ -18,13 +18,19 @@ public class MessageResponseHandler implements ResponseHandler {
         if(response.success()) {
             // Get login payload
             MessagePayload payload = (MessagePayload) response.payload();
+            String sender;
 
-            String sender = client.getUser().getUserID().equals(payload.senderID())
-                    ? "You"
-                    : payload.senderID();
+            if(payload.isSystemMessage()) {
+                window.getChatScreen().appendSystemMessage(payload.message());
+            }
+            else {
+                sender = client.getUser().getUserID().equals(payload.senderID())
+                        ? "You"
+                        : payload.senderID();
 
-            // Append message to the chat
-            window.getChatScreen().appendToChat(payload.message(), sender);
+                window.getChatScreen().appendUserMessage(payload.message(), sender);
+            }
+
             window.getChatScreen().clearInput();
         }
         else {

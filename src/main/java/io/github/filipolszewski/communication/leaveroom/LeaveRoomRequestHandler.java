@@ -4,11 +4,13 @@ import io.github.filipolszewski.communication.Payload;
 import io.github.filipolszewski.communication.Request;
 import io.github.filipolszewski.communication.RequestHandler;
 import io.github.filipolszewski.communication.Response;
-import io.github.filipolszewski.communication.joinroom.JoinRoomPayload;
 import io.github.filipolszewski.model.user.User;
 import io.github.filipolszewski.server.ClientHandler;
-import io.github.filipolszewski.server.managers.UserManager;
+import lombok.extern.java.Log;
 
+import java.io.IOException;
+
+@Log
 public class LeaveRoomRequestHandler implements RequestHandler {
     @Override
     public Response<LeaveRoomPayload> handle(Request<? extends Payload> request, ClientHandler clientHandler) {
@@ -33,6 +35,13 @@ public class LeaveRoomRequestHandler implements RequestHandler {
 
         // Clear the room user is currently in
         user.setCurrentRoomID(null);
+
+        // Broadcast leaving the room
+        try {
+            clientHandler.getServer().broadcastRoom(roomID, uid + " has left the room");
+        } catch (IOException e) {
+            log.severe("Could not broadcast the message");
+        }
 
         // Send back success
         return new Response<>("Left the room " + roomID, payload);

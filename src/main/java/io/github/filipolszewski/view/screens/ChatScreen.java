@@ -65,9 +65,14 @@ public class ChatScreen extends JPanel {
         return input.getText();
     }
 
-    public void appendToChat(String message, String sender) {
+    public void appendUserMessage(String message, String sender) {
         String messageToAppend = "(" + sender + "): " + message;
         textArea.append(messageToAppend + "\n");
+        textArea.setCaretPosition(textArea.getDocument().getLength());
+    }
+
+    public void appendSystemMessage(String message) {
+        textArea.append(message + "\n");
         textArea.setCaretPosition(textArea.getDocument().getLength());
     }
 
