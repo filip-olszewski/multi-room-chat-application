@@ -1,9 +1,14 @@
 package io.github.filipolszewski.server;
 
+import io.github.filipolszewski.communication.RoomUpdateType;
 import io.github.filipolszewski.communication.core.Response;
 import io.github.filipolszewski.communication.payloads.MessagePayload;
+import io.github.filipolszewski.communication.payloads.RoomUpdatePayload;
 import io.github.filipolszewski.constants.AppConfig;
-import io.github.filipolszewski.server.services.RoomNotifierService;
+import io.github.filipolszewski.server.events.*;
+import io.github.filipolszewski.server.events.impl.RoomCreatedEvent;
+import io.github.filipolszewski.server.events.impl.RoomDeletedEvent;
+import io.github.filipolszewski.server.events.impl.RoomModifiedEvent;
 import io.github.filipolszewski.server.services.RoomService;
 import io.github.filipolszewski.server.services.UserService;
 import lombok.extern.java.Log;
@@ -18,16 +23,39 @@ import java.util.concurrent.Executors;
 @Log
 public class Server {
 
-    private final UserService userService;
-    private final RoomService roomService;
-    private final RoomNotifierService roomNotifierService;
     private final Map<String, ClientHandler> clients;
+    private final ServerContext context;
 
     public Server() {
         clients = new ConcurrentHashMap<>();
-        userService = new UserService();
-        roomService = new RoomService();
-        roomNotifierService = new RoomNotifierService(this, roomService);
+
+        UserService userService = new UserService();
+        RoomService roomService = new RoomService();
+        EventBus eventBus = new EventBus();
+
+        eventBus.registerEvent(RoomCreatedEvent.class, e -> {
+            try {
+                broadcastAll(new Response<>("", new RoomUpdatePayload(e.room(), RoomUpdateType.CREATE)));
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+        });
+        eventBus.registerEvent(RoomModifiedEvent.class, e -> {
+            try {
+                broadcastAll(new Response<>("", new RoomUpdatePayload(e.room(), RoomUpdateType.MODIFY)));
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+        });
+        eventBus.registerEvent(RoomDeletedEvent.class, e -> {
+            try {
+                broadcastAll(new Response<>("", new RoomUpdatePayload(e.room(), RoomUpdateType.DELETE)));
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+        });
+
+        context = new ServerContext(roomService, userService, eventBus);
     }
 
     /**
@@ -47,7 +75,7 @@ public class Server {
                 log.info("A new client (" + clientSocket.getRemoteSocketAddress()
                         + ") has successfully been connected.");
 
-                var handler = new ClientHandler(clientSocket, userService, roomService, roomNotifierService, this);
+                var handler = new ClientHandler(clientSocket, context, this);
                 clientPool.submit(handler);
             }
 
@@ -89,7 +117,7 @@ public class Server {
      * @throws IOException  IOException If an I/O error occurs during the write operation
      */
     public void broadcastMessageRoom(String roomID, String senderID, String message) throws IOException {
-        for(String userID : roomService.getRoom(roomID).getActiveUsers()) {
+        for(String userID : context.roomService().getRoom(roomID).getActiveUsers()) {
             if(userID.equals(senderID)) continue;
             var client = clients.get(userID);
             client.getConn().send(new Response<>(null, new MessagePayload(message, senderID)));
@@ -104,7 +132,7 @@ public class Server {
      * @throws IOException  IOException If an I/O error occurs during the write operation
      */
     public void broadcastMessageRoom(String roomID, String message) throws IOException {
-        for(String userID : roomService.getRoom(roomID).getActiveUsers()) {
+        for(String userID : context.roomService().getRoom(roomID).getActiveUsers()) {
             var client = clients.get(userID);
             client.getConn().send(new Response<>(null, new MessagePayload(message, true)));
         }

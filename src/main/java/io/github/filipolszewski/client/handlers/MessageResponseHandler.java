@@ -13,26 +13,25 @@ public class MessageResponseHandler implements ResponseHandler {
     public void handle(Response<? extends Payload> response, Client client) {
         final var window = client.getWindow();
 
-        if(response.success()) {
-            // Get login payload
-            final MessagePayload payload = (MessagePayload) response.payload();
-            String sender;
-
-            if(payload.isSystemMessage()) {
-                window.getChatScreen().appendSystemMessage(payload.message());
-            }
-            else {
-                sender = client.getUser().getUserID().equals(payload.senderID())
-                        ? "You"
-                        : payload.senderID();
-
-                window.getChatScreen().appendUserMessage(payload.message(), sender);
-            }
-
-            window.getChatScreen().clearInput();
-        }
-        else {
+        if(!response.success()) {
             window.displayErrorDialog(response.message());
         }
+
+        // Get login payload
+        final MessagePayload payload = (MessagePayload) response.payload();
+        String sender;
+
+        if(payload.isSystemMessage()) {
+            window.getChatScreen().appendSystemMessage(payload.message());
+        }
+        else {
+            sender = client.getUser().getUserID().equals(payload.senderID())
+                    ? "You"
+                    : payload.senderID();
+
+            window.getChatScreen().appendUserMessage(payload.message(), sender);
+        }
+
+        window.getChatScreen().clearInput();
     }
 }

@@ -6,7 +6,13 @@ import io.github.filipolszewski.communication.core.RequestHandler;
 import io.github.filipolszewski.communication.core.Response;
 import io.github.filipolszewski.communication.payloads.JoinRoomPayload;
 import io.github.filipolszewski.constants.status.room.JoinRoomStatus;
+import io.github.filipolszewski.model.room.Room;
 import io.github.filipolszewski.server.ClientHandler;
+import io.github.filipolszewski.server.events.impl.RoomCreatedEvent;
+import io.github.filipolszewski.server.events.impl.RoomModifiedEvent;
+import io.github.filipolszewski.server.services.RoomService;
+import io.github.filipolszewski.server.services.UserService;
+import io.github.filipolszewski.util.mappers.RoomMapper;
 import lombok.extern.java.Log;
 
 import java.io.IOException;
@@ -16,9 +22,8 @@ public class JoinRoomRequestHandler implements RequestHandler {
     @Override
     public Response<JoinRoomPayload> handle(Request<? extends Payload> request, ClientHandler clientHandler) {
 
-        // Get payload and data
+        // Get payload and user ID
         final JoinRoomPayload payload = (JoinRoomPayload) request.payload();
-        final String roomID = payload.roomID();
         final String uid = clientHandler.getUserID();
 
         // Fail if user not registered
@@ -27,8 +32,13 @@ public class JoinRoomRequestHandler implements RequestHandler {
                     "Failure. You need to be logged in to join a room.", payload);
         }
 
+        // Get data
+        final String roomID = payload.roomID();
+        final UserService us = clientHandler.getContext().userService();
+        final RoomService rs = clientHandler.getContext().roomService();
+
         // Check room availability
-        JoinRoomStatus status = clientHandler.getRoomService().joinRoom(roomID, uid);
+        JoinRoomStatus status = rs.joinRoom(roomID, uid);
 
         switch(status) {
             // Success, room was found and there was enough space for user to join
@@ -40,8 +50,14 @@ public class JoinRoomRequestHandler implements RequestHandler {
                     log.severe("Could not broadcast the message");
                 }
 
+                System.out.println(rs.getRoom(roomID));
+
+                // Notify other clients about someone joining the room for a UI update
+                Room room = rs.getRoom(roomID);
+                clientHandler.getContext().eventBus().emit(new RoomModifiedEvent(RoomMapper.toDTO(room)));
+
                 // Set room id for client handler
-                clientHandler.getUserService().getUser(uid).setCurrentRoomID(roomID);
+                us.getUser(uid).setCurrentRoomID(roomID);
 
                 // Send success
                 return new Response<>("Successfully joined the room \"" + roomID + "\".", payload);

@@ -1,29 +1,17 @@
 package io.github.filipolszewski.client;
 
 import io.github.filipolszewski.client.commands.CommandRegistry;
+import io.github.filipolszewski.client.handlers.*;
 import io.github.filipolszewski.communication.core.Payload;
 import io.github.filipolszewski.communication.core.Request;
 import io.github.filipolszewski.communication.core.Response;
 import io.github.filipolszewski.communication.core.ResponseHandler;
-import io.github.filipolszewski.communication.payloads.CreateRoomPayload;
-import io.github.filipolszewski.client.handlers.CreateRoomResponseHandler;
-import io.github.filipolszewski.communication.payloads.DeleteRoomPayload;
-import io.github.filipolszewski.client.handlers.DeleteRoomResponseHandler;
-import io.github.filipolszewski.communication.payloads.FetchRoomsPayload;
-import io.github.filipolszewski.client.handlers.FetchRoomsResponseHandler;
-import io.github.filipolszewski.communication.payloads.JoinRoomPayload;
-import io.github.filipolszewski.client.handlers.JoinRoomResponseHandler;
-import io.github.filipolszewski.communication.payloads.LeaveRoomPayload;
-import io.github.filipolszewski.client.handlers.LeaveRoomResponseHandler;
-import io.github.filipolszewski.communication.payloads.LoginPayload;
-import io.github.filipolszewski.client.handlers.LoginResponseHandler;
-import io.github.filipolszewski.communication.payloads.MessagePayload;
-import io.github.filipolszewski.client.handlers.MessageResponseHandler;
+import io.github.filipolszewski.communication.payloads.*;
 import io.github.filipolszewski.connection.SocketConnection;
 import io.github.filipolszewski.connection.Connection;
 import io.github.filipolszewski.constants.AppConfig;
 import io.github.filipolszewski.constants.RoomPrivacyPolicy;
-import io.github.filipolszewski.model.room.Room;
+import io.github.filipolszewski.dto.RoomDTO;
 import io.github.filipolszewski.model.user.User;
 import io.github.filipolszewski.client.commands.impl.*;
 import io.github.filipolszewski.client.ui.AppWindow;
@@ -54,7 +42,7 @@ public class Client {
     private User user;
 
     @Getter
-    private final Map<String, Room> publicRooms;
+    private final Map<String, RoomDTO> publicRooms;
 
     public Client() {
         window = new AppWindow();
@@ -69,6 +57,7 @@ public class Client {
         responseHandlers.put(JoinRoomPayload.class, new JoinRoomResponseHandler());
         responseHandlers.put(MessagePayload.class, new MessageResponseHandler());
         responseHandlers.put(FetchRoomsPayload.class, new FetchRoomsResponseHandler());
+        responseHandlers.put(RoomUpdatePayload.class, new RoomUpdateResponseHandler());
     }
 
 
@@ -99,6 +88,9 @@ public class Client {
 
         // Try to log in
         requestLogin();
+
+        // Fetch public rooms to rooms list
+        commandRegistry.getParam(FetchRoomsCommand.class).execute(RoomPrivacyPolicy.PUBLIC);
 
         // Handle incoming responses
         handleResponse();
@@ -226,9 +218,9 @@ public class Client {
      * Appends a direct join command
      * @param room    Room associated with the listing
      */
-    public void addRoomListingToUI(Room room) {
+    public void addRoomListingToUI(RoomDTO room) {
         window.getHomeScreen().addRoomListing(room, e -> {
-            commandRegistry.getParam(JoinRoomCommand.class).execute(room.getRoomID());
+            commandRegistry.getParam(JoinRoomCommand.class).execute(room.roomID());
         });
     }
 

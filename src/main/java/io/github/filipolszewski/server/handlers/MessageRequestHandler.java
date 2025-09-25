@@ -7,6 +7,7 @@ import io.github.filipolszewski.communication.core.Response;
 import io.github.filipolszewski.communication.payloads.MessagePayload;
 import io.github.filipolszewski.model.user.User;
 import io.github.filipolszewski.server.ClientHandler;
+import io.github.filipolszewski.server.services.UserService;
 import lombok.extern.java.Log;
 
 import java.io.IOException;
@@ -19,7 +20,8 @@ public class MessageRequestHandler implements RequestHandler {
         // Get payload and data
         final MessagePayload payload = (MessagePayload) request.payload();
         final String uid = clientHandler.getUserID();
-        final User user = clientHandler.getUserService().getUser(uid);
+        final UserService us = clientHandler.getContext().userService();
+        final User user = us.getUser(uid);
         final String roomID = user.getCurrentRoomID();
 
         // Try to broadcast the message

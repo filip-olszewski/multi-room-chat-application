@@ -1,5 +1,6 @@
 package io.github.filipolszewski.client.ui.screens;
 
+import io.github.filipolszewski.dto.RoomDTO;
 import io.github.filipolszewski.model.room.Room;
 import io.github.filipolszewski.client.ui.components.RoomListing;
 
@@ -63,13 +64,11 @@ public class HomeScreen extends JPanel {
         roomListPanel.repaint();
     }
 
-    public void addRoomListing(Room room, ActionListener actionListener) {
+    public void addRoomListing(RoomDTO room, ActionListener actionListener) {
         RoomListing roomListing = new RoomListing(room);
 
         roomListing.getJoinButton().addActionListener(actionListener);
 
         roomListPanel.add(roomListing);
-        roomListPanel.revalidate();
-        roomListPanel.repaint();
     }
 }

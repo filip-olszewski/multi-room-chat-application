@@ -1,5 +1,6 @@
 package io.github.filipolszewski.client.ui.components;
 
+import io.github.filipolszewski.dto.RoomDTO;
 import io.github.filipolszewski.model.room.Room;
 import lombok.Getter;
 
@@ -12,11 +13,11 @@ public class RoomListing extends JPanel {
     @Getter
     private final JButton joinButton;
 
-    public RoomListing(Room room) {
-        roomIdLabel = new JLabel(room.getRoomID());
+    public RoomListing(RoomDTO room) {
+        roomIdLabel = new JLabel(room.roomID());
 
-        String activeUsersStr = Integer.toString(room.getActiveUsers().size());
-        String maxUsersStr =  Integer.toString(room.getCapacity());
+        String activeUsersStr = Integer.toString(room.activeUsers().size());
+        String maxUsersStr =  Integer.toString(room.capacity());
         activeUsers = new JLabel(activeUsersStr + " / " + maxUsersStr);
 
         joinButton = new JButton("Join room");

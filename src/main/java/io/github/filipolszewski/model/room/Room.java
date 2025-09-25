@@ -12,6 +12,7 @@ import java.util.Set;
 @ToString
 @Getter
 public class Room implements Serializable {
+
     private final String roomID;
     private final String adminID;
 
@@ -68,4 +69,5 @@ public class Room implements Serializable {
     public synchronized boolean leaveRoom(String userID) {
         return activeUsers.remove(userID);
     }
+
 }

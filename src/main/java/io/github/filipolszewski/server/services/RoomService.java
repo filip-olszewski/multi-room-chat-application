@@ -22,6 +22,10 @@ public class RoomService {
                 : CreateRoomStatus.ALREADY_EXISTS;
     }
 
+    public CreateRoomStatus createRoom(Room room) {
+        return this.createRoom(room.getRoomID(), room.getAdminID(), room.getCapacity(), room.getPrivacy());
+    }
+
     public synchronized CreateAndJoinRoomStatus createAndJoinRoom(
             String roomID, String adminID, int capacity, RoomPrivacyPolicy privacy) {
 

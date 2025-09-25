@@ -14,16 +14,18 @@ public class LoginRequestHandler implements RequestHandler {
     @Override
     public Response<LoginPayload> handle(Request<? extends Payload> request, ClientHandler clientHandler) {
 
-        // Get payload and data
+        // Get payload and userID and server reference
         final LoginPayload payload = (LoginPayload) request.payload();
         final String uid = payload.userID();
-        final UserService us = clientHandler.getUserService();
         final Server server = clientHandler.getServer();
 
         // Check if user is already in the clients map
         if(server.getClientHandler(uid) != null) {
             return new Response<>(false, "User \"" + uid + "\" already exists!", payload);
         }
+
+        // Get data
+        final UserService us = clientHandler.getContext().userService();
 
         // Get user from user manager
         User user = us.getOrAddUser(uid);
@@ -33,6 +35,7 @@ public class LoginRequestHandler implements RequestHandler {
             return new Response<>(false, "Failed to log in user \"" + uid + "\".", payload);
         }
 
+
         // Add clientHandler to the map
         server.addClientHandler(uid, clientHandler);
 
@@ -41,6 +44,7 @@ public class LoginRequestHandler implements RequestHandler {
 
         // Set id of current user clientHandler is handling
         clientHandler.setUserID(uid);
+
 
         return new Response<>("Successfully logged in as \"" + uid + "\".", payload);
     }

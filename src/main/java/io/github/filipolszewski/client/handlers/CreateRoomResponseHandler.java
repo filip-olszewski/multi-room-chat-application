@@ -22,28 +22,5 @@ public class CreateRoomResponseHandler implements ResponseHandler {
 
         // Display dialog
         window.displaySuccessDialog(response.message());
-
-        // FIXME: maybe delete and delegate this behaviour to fetch
-
-        /*
-        // Get payload and other data
-        final CreateRoomPayload payload = (CreateRoomPayload) response.payload();
-        final String uid = client.getUser().getUserID();
-        final String roomID = payload.roomID();
-        final int capacity = payload.capacity();
-        final RoomPrivacyPolicy privacy = payload.privacy();
-
-        Room room = new Room(roomID, uid, capacity, privacy);
-
-        // Add room to public room map
-        if(privacy == RoomPrivacyPolicy.PUBLIC) {
-            client.getPublicRooms().put(roomID, room);
-        }
-
-        // Add room to UI
-        SwingUtilities.invokeLater(() -> {
-            client.addRoomListingToUI(room);
-        });
-        */
     }
 }
