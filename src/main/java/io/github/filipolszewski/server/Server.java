@@ -1,10 +1,8 @@
 package io.github.filipolszewski.server;
 
-import io.github.filipolszewski.communication.Response;
-import io.github.filipolszewski.communication.message.MessagePayload;
+import io.github.filipolszewski.communication.core.Response;
+import io.github.filipolszewski.communication.payloads.MessagePayload;
 import io.github.filipolszewski.constants.AppConfig;
-import io.github.filipolszewski.model.room.Room;
-import io.github.filipolszewski.model.user.User;
 import io.github.filipolszewski.server.managers.RoomManager;
 import io.github.filipolszewski.server.managers.UserManager;
 import lombok.extern.java.Log;
@@ -12,10 +10,8 @@ import lombok.extern.java.Log;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executors;
 
 @Log
