@@ -19,13 +19,15 @@ public class CreateRoomCommand implements NoArgsCommand {
 
     @Override
     public void execute() {
-        String roomID = window.promptInputDialog("Enter new room ID");
-        if(roomID == null || roomID.trim().isEmpty()) {
-            window.displayErrorDialog("Room name cannot be empty");
+        CreateRoomPayload payload = window.promptCreateRoom("Create new room");
+        if(payload == null) {
             return;
         }
+        if(payload.roomID().trim().isEmpty()) {
+            window.displayErrorDialog("RoomID cannot be empty");
+        }
 
-        Request<CreateRoomPayload> req = new Request<>(new CreateRoomPayload(roomID));
+        Request<CreateRoomPayload> req = new Request<>(payload);
 
         try {
             conn.send(req);

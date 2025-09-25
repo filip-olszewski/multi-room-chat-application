@@ -84,11 +84,6 @@ public class RoomManager {
     }
 
     public Collection<Room> getAll(RoomPrivacyPolicy privacy) {
-
-        if(privacy == RoomPrivacyPolicy.ANY) {
-            return getAll();
-        }
-
         Collection<Room> publicRooms = rooms.values()
                 .stream()
                 .filter(room -> room.getPrivacy() == privacy)

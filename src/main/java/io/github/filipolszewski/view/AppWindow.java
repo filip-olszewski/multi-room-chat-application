@@ -1,6 +1,8 @@
 package io.github.filipolszewski.view;
 
+import io.github.filipolszewski.communication.createroom.CreateRoomPayload;
 import io.github.filipolszewski.constants.WindowConfig;
+import io.github.filipolszewski.view.components.CreateRoomDialog;
 import io.github.filipolszewski.view.screens.ChatScreen;
 import io.github.filipolszewski.view.screens.HomeScreen;
 import lombok.Getter;
@@ -41,6 +43,10 @@ public class AppWindow {
 
     public void showHomeScreen() {
         ((CardLayout) mainPanel.getLayout()).show(mainPanel, HomeScreen.HOME_SCREEN_KEY);
+    }
+
+    public CreateRoomPayload promptCreateRoom(String message) {
+        return new CreateRoomDialog().showDialog(mainPanel, message);
     }
 
     public String promptInputDialog(String message) {

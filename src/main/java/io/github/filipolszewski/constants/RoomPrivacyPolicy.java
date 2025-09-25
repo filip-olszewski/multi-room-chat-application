@@ -4,5 +4,4 @@ public enum RoomPrivacyPolicy {
     PRIVATE,
     NON_PUBLIC,
     PUBLIC,
-    ANY
 }
