@@ -11,7 +11,7 @@ import javax.swing.*;
 public class DeleteRoomResponseHandler implements ResponseHandler {
     @Override
     public void handle(Response<? extends Payload> response, Client client) {
-        var window = client.getWindow();
+        final var window = client.getWindow();
 
         if(!response.success()) {
             window.displayErrorDialog(response.message());

@@ -28,20 +28,20 @@ public class JoinRoomRequestHandler implements RequestHandler {
         }
 
         // Check room availability
-        JoinRoomStatus status = clientHandler.getRoomManager().joinRoom(roomID, uid);
+        JoinRoomStatus status = clientHandler.getRoomService().joinRoom(roomID, uid);
 
         switch(status) {
             // Success, room was found and there was enough space for user to join
             case SUCCESS -> {
                 // Broadcast joining to others
                 try {
-                    clientHandler.getServer().broadcastRoom(roomID, uid + " has joined the room.");
+                    clientHandler.getServer().broadcastMessageRoom(roomID, uid + " has joined the room.");
                 } catch (IOException e) {
                     log.severe("Could not broadcast the message");
                 }
 
                 // Set room id for client handler
-                clientHandler.getUserManager().getUser(uid).setCurrentRoomID(roomID);
+                clientHandler.getUserService().getUser(uid).setCurrentRoomID(roomID);
 
                 // Send success
                 return new Response<>("Successfully joined the room \"" + roomID + "\".", payload);

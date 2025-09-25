@@ -14,7 +14,7 @@ import lombok.extern.java.Log;
 public class LoginResponseHandler implements ResponseHandler {
     @Override
     public void handle(Response<? extends Payload> response, Client client) {
-        var window = client.getWindow();
+        final var window = client.getWindow();
 
         if(!response.success()) {
             window.displayErrorDialog(response.message());
@@ -23,7 +23,7 @@ public class LoginResponseHandler implements ResponseHandler {
         }
 
         // Get login payload
-        LoginPayload payload = (LoginPayload) response.payload();
+        final LoginPayload payload = (LoginPayload) response.payload();
 
         // Create and set new user for client
         client.setUser(new User(payload.userID()));
@@ -32,7 +32,8 @@ public class LoginResponseHandler implements ResponseHandler {
         window.displaySuccessDialog(response.message());
         window.showHomeScreen();
 
+        // FIXME: put this in init()?
         // Fetch public rooms to rooms list
-        client.getCommandRegistry().getParam(FetchRoomsCommand.class).execute(RoomPrivacyPolicy.PUBLIC);
+        // client.getCommandRegistry().getParam(FetchRoomsCommand.class).execute(RoomPrivacyPolicy.PUBLIC);
     }
 }

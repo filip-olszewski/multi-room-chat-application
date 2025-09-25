@@ -8,7 +8,7 @@ import io.github.filipolszewski.communication.payloads.LoginPayload;
 import io.github.filipolszewski.model.user.User;
 import io.github.filipolszewski.server.ClientHandler;
 import io.github.filipolszewski.server.Server;
-import io.github.filipolszewski.server.managers.UserManager;
+import io.github.filipolszewski.server.services.UserService;
 
 public class LoginRequestHandler implements RequestHandler {
     @Override
@@ -17,7 +17,7 @@ public class LoginRequestHandler implements RequestHandler {
         // Get payload and data
         final LoginPayload payload = (LoginPayload) request.payload();
         final String uid = payload.userID();
-        final UserManager um = clientHandler.getUserManager();
+        final UserService us = clientHandler.getUserService();
         final Server server = clientHandler.getServer();
 
         // Check if user is already in the clients map
@@ -26,7 +26,7 @@ public class LoginRequestHandler implements RequestHandler {
         }
 
         // Get user from user manager
-        User user = um.getOrAddUser(uid);
+        User user = us.getOrAddUser(uid);
 
         // If user does not exist create new user
         if (user == null) {
@@ -37,7 +37,7 @@ public class LoginRequestHandler implements RequestHandler {
         server.addClientHandler(uid, clientHandler);
 
         // Add new user to the user manager
-        um.addUser(user);
+        us.addUser(user);
 
         // Set id of current user clientHandler is handling
         clientHandler.setUserID(uid);

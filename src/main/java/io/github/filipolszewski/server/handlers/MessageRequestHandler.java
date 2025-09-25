@@ -19,12 +19,12 @@ public class MessageRequestHandler implements RequestHandler {
         // Get payload and data
         final MessagePayload payload = (MessagePayload) request.payload();
         final String uid = clientHandler.getUserID();
-        final User user = clientHandler.getUserManager().getUser(uid);
+        final User user = clientHandler.getUserService().getUser(uid);
         final String roomID = user.getCurrentRoomID();
 
         // Try to broadcast the message
         try {
-            clientHandler.getServer().broadcastRoom(roomID, uid, payload.message());
+            clientHandler.getServer().broadcastMessageRoom(roomID, uid, payload.message());
         } catch (IOException e) {
             // If failed log and send back failure
             log.severe("Could not broadcast message " + payload + " from " + uid);

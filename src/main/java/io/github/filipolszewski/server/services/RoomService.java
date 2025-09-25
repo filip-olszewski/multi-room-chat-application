@@ -1,4 +1,4 @@
-package io.github.filipolszewski.server.managers;
+package io.github.filipolszewski.server.services;
 
 import io.github.filipolszewski.constants.status.room.*;
 import io.github.filipolszewski.model.room.Room;
@@ -9,10 +9,10 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class RoomManager {
+public class RoomService {
     private final Map<String, Room> rooms;
 
-    public RoomManager() {
+    public RoomService() {
         rooms = new ConcurrentHashMap<>();
     }
 

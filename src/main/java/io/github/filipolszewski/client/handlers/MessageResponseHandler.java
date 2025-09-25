@@ -11,11 +11,11 @@ import lombok.extern.java.Log;
 public class MessageResponseHandler implements ResponseHandler {
     @Override
     public void handle(Response<? extends Payload> response, Client client) {
-        var window = client.getWindow();
+        final var window = client.getWindow();
 
         if(response.success()) {
             // Get login payload
-            MessagePayload payload = (MessagePayload) response.payload();
+            final MessagePayload payload = (MessagePayload) response.payload();
             String sender;
 
             if(payload.isSystemMessage()) {

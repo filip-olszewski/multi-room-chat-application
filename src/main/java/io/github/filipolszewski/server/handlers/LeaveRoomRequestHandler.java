@@ -29,11 +29,11 @@ public class LeaveRoomRequestHandler implements RequestHandler {
         }
 
         // Get current roomID and user
-        final User user = clientHandler.getUserManager().getUser(uid);
+        final User user = clientHandler.getUserService().getUser(uid);
         final String roomID = user.getCurrentRoomID();
 
         // Leave the room
-        LeaveRoomStatus status = clientHandler.getRoomManager().leaveRoom(roomID, uid);
+        LeaveRoomStatus status = clientHandler.getRoomService().leaveRoom(roomID, uid);
         
         switch(status) {
             case SUCCESS -> {
@@ -42,7 +42,7 @@ public class LeaveRoomRequestHandler implements RequestHandler {
 
                 // Broadcast leaving the room
                 try {
-                    clientHandler.getServer().broadcastRoom(roomID, uid + " has left the room");
+                    clientHandler.getServer().broadcastMessageRoom(roomID, uid + " has left the room");
                 } catch (IOException e) {
                     log.severe("Could not broadcast the message");
                 }

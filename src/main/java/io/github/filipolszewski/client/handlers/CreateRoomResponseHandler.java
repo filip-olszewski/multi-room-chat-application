@@ -13,22 +13,25 @@ import javax.swing.*;
 public class CreateRoomResponseHandler implements ResponseHandler {
     @Override
     public void handle(Response<? extends Payload> response, Client client) {
-        var window = client.getWindow();
+        final var window = client.getWindow();
 
         if(!response.success()) {
             window.displayErrorDialog(response.message());
             return;
         }
 
+        // Display dialog
+        window.displaySuccessDialog(response.message());
+
+        // FIXME: maybe delete and delegate this behaviour to fetch
+
+        /*
         // Get payload and other data
         final CreateRoomPayload payload = (CreateRoomPayload) response.payload();
         final String uid = client.getUser().getUserID();
         final String roomID = payload.roomID();
         final int capacity = payload.capacity();
         final RoomPrivacyPolicy privacy = payload.privacy();
-
-        // Display dialog
-        window.displaySuccessDialog(response.message());
 
         Room room = new Room(roomID, uid, capacity, privacy);
 
@@ -41,5 +44,6 @@ public class CreateRoomResponseHandler implements ResponseHandler {
         SwingUtilities.invokeLater(() -> {
             client.addRoomListingToUI(room);
         });
+        */
     }
 }

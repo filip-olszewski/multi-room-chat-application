@@ -21,8 +21,9 @@ import io.github.filipolszewski.server.handlers.MessageRequestHandler;
 import io.github.filipolszewski.connection.SocketConnection;
 import io.github.filipolszewski.connection.Connection;
 import io.github.filipolszewski.model.user.User;
-import io.github.filipolszewski.server.managers.RoomManager;
-import io.github.filipolszewski.server.managers.UserManager;
+import io.github.filipolszewski.server.services.RoomNotifierService;
+import io.github.filipolszewski.server.services.RoomService;
+import io.github.filipolszewski.server.services.UserService;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.java.Log;
@@ -43,13 +44,19 @@ public class ClientHandler implements Runnable {
 
     private final Socket clientSocketRef;
     @Getter private final Server server;
-    @Getter private final RoomManager roomManager;
-    @Getter private final UserManager userManager;
+    @Getter private final RoomService roomService;
+    @Getter private final UserService userService;
+    @Getter private final RoomNotifierService roomNotifierService;
 
     @Getter @Setter
     private String userID;
 
-    public ClientHandler(Socket clientSocket, UserManager userManager, RoomManager roomManager, Server server) {
+    public ClientHandler(Socket clientSocket,
+                         UserService userService,
+                         RoomService roomService,
+                         RoomNotifierService roomNotifierService,
+                         Server server) {
+
         requestHandlers = new HashMap<>();
         requestHandlers.put(LoginPayload.class, new LoginRequestHandler());
         requestHandlers.put(CreateRoomPayload.class, new CreateRoomRequestHandler());
@@ -59,8 +66,9 @@ public class ClientHandler implements Runnable {
         requestHandlers.put(MessagePayload.class, new MessageRequestHandler());
         requestHandlers.put(FetchRoomsPayload.class, new FetchRoomsRequestHandler());
 
-        this.userManager = userManager;
-        this.roomManager = roomManager;
+        this.userService = userService;
+        this.roomService = roomService;
+        this.roomNotifierService = roomNotifierService;
         this.server = server;
         this.clientSocketRef = clientSocket;
 
@@ -108,11 +116,11 @@ public class ClientHandler implements Runnable {
         finally {
             server.removeClientHandler(userID);
 
-            if (userID != null && userManager.getUser(userID) != null) {
-                User u = userManager.getUser(userID);
+            if (userID != null && userService.getUser(userID) != null) {
+                User u = userService.getUser(userID);
 
-                userManager.removeUser(userID);
-                roomManager.leaveRoom(u.getCurrentRoomID(), userID);
+                userService.removeUser(userID);
+                roomService.leaveRoom(u.getCurrentRoomID(), userID);
 
                 log.info("Logging out user: " + userID);
             }

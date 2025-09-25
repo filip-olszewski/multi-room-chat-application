@@ -9,14 +9,14 @@ import io.github.filipolszewski.communication.payloads.JoinRoomPayload;
 public class JoinRoomResponseHandler implements ResponseHandler {
     @Override
     public void handle(Response<? extends Payload> response, Client client) {
-        var window = client.getWindow();
+        final var window = client.getWindow();
 
         if(!response.success()) {
             window.displayErrorDialog(response.message());
             return;
         }
 
-        JoinRoomPayload payload = (JoinRoomPayload) response.payload();
+        final JoinRoomPayload payload = (JoinRoomPayload) response.payload();
 
         // Display success dialog and change the screen
         window.displaySuccessDialog(response.message());

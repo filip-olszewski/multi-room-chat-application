@@ -1,17 +1,16 @@
-package io.github.filipolszewski.server.managers;
+package io.github.filipolszewski.server.services;
 
 import io.github.filipolszewski.model.user.User;
 import lombok.extern.java.Log;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 @Log
-public class UserManager {
+public class UserService {
     private final Map<String, User> users;
 
-    public UserManager() {
+    public UserService() {
         users = new ConcurrentHashMap<>();
     }
 

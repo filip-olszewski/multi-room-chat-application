@@ -224,7 +224,7 @@ public class Client {
     /**
      * Creates a new room listing in the UI
      * Appends a direct join command
-     * @param roomID    ID of the room associated with the listing
+     * @param room    Room associated with the listing
      */
     public void addRoomListingToUI(Room room) {
         window.getHomeScreen().addRoomListing(room, e -> {

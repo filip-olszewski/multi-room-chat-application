@@ -24,7 +24,7 @@ public class DeleteRoomRequestHandler implements RequestHandler {
         }
 
         // Try to delete the room
-        RemoveRoomStatus status = clientHandler.getRoomManager().removeRoom(roomID, uid);
+        RemoveRoomStatus status = clientHandler.getRoomService().removeRoom(roomID, uid);
 
         // If ok send success, else send failure
         return switch(status) {
