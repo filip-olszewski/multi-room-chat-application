@@ -16,15 +16,14 @@ public class DeleteRoomResponseHandler implements ResponseHandler {
             return;
         }
 
+        // Show success
         window.displaySuccessDialog(response.message());
 
         final DeleteRoomPayload payload = (DeleteRoomPayload) response.payload();
-        final String roomID = payload.roomID();
 
-        client.getRooms().forEach((policy, roomList) -> {
-            roomList.removeIf(room -> room.getRoomID().equals(roomID));
-        });
+        // Delete the room from the public room list
+        client.getPublicRooms().remove(payload.roomID());
 
-        SwingUtilities.invokeLater(client::refreshRoomsList);
+        SwingUtilities.invokeLater(client::refreshRoomsListUI);
     }
 }

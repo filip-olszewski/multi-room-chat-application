@@ -42,20 +42,26 @@ import java.util.Map;
 public class Client {
 
     private final Map<Class<? extends Payload>, ResponseHandler> responseHandlers;
-    @Getter private Connection<Request<? extends Payload>, Response<? extends Payload>> conn;
-    @Getter private final AppWindow window;
-    @Getter private final CommandRegistry commandRegistry;
+
+    @Getter
+    private Connection<Request<? extends Payload>, Response<? extends Payload>> conn;
+
+    @Getter
+    private final AppWindow window;
+
+    @Getter
+    private final CommandRegistry commandRegistry;
 
     @Getter @Setter
     private User user;
 
     @Getter
-    private Map<RoomPrivacyPolicy, List<Room>> rooms;
+    private final Map<String, Room> publicRooms;
 
     public Client() {
         window = new AppWindow();
         responseHandlers = new HashMap<>();
-        rooms = new HashMap<>();
+        publicRooms = new HashMap<>();
         commandRegistry = new CommandRegistry();
 
         responseHandlers.put(LoginPayload.class, new LoginResponseHandler());
@@ -67,6 +73,15 @@ public class Client {
         responseHandlers.put(FetchRoomsPayload.class, new FetchRoomsResponseHandler());
     }
 
+
+    /**
+     * Entry method for the client class. Established connection with the server.
+     * Shows client window and handles initialization:
+     * <li>Registers commands</li>
+     * <li>Binds UI elements to use commands</li>
+     * <li>Sends a login request</li>
+     * <li>Starts the response handling loop</li>
+     */
     public void init() {
         try {
             conn = new SocketConnection<>(new Socket(AppConfig.HOST, AppConfig.PORT));
@@ -91,6 +106,11 @@ public class Client {
         handleResponse();
     }
 
+
+    /**
+     * Handles incoming responses from the server
+     * Runs on a separate thread to avoid blocking Swing's UI thread
+     */
     private void handleResponse() {
         new Thread(() -> {
             while(true) {
@@ -124,6 +144,10 @@ public class Client {
         }).start();
     }
 
+    /**
+     * Handles initial logging in
+     * Prompts user for a username (userID) and sends a login request to the server
+     */
     public void requestLogin() {
         String username = window.promptInputDialog("Please input your username");
 
@@ -149,8 +173,9 @@ public class Client {
         }
     }
 
+
     /**
-     * Register all the commands to the registry
+     * Registers all the commands to the registry
      */
     private void registerCommands() {
         commandRegistry.register(CreateRoomCommand.class, new CreateRoomCommand(conn, window));
@@ -161,6 +186,10 @@ public class Client {
         commandRegistry.register(FetchRoomsCommand.class, new FetchRoomsCommand(conn, window));
     }
 
+
+    /**
+     * Binds commands to UI elements by adding appropriate action listeners
+     */
     private void bindUIActions() {
         // Register add button with create room command
         window.getHomeScreen().addCreateButtonListener(e -> {
@@ -193,14 +222,25 @@ public class Client {
         });
     }
 
-    public void addRoomListing(String roomID) {
+
+    /**
+     * Creates a new room listing in the UI
+     * Appends a direct join command
+     * @param roomID    ID of the room associated with the listing
+     */
+    public void addRoomListingToUI(String roomID) {
         window.getHomeScreen().addRoomListing(roomID, e -> {
             commandRegistry.getParam(JoinRoomCommand.class).execute(roomID);
         });
     }
 
-    public void refreshRoomsList() {
+
+    /**
+     * Refreshes the rooms based on the local client's room list
+     * (Does not fetch from the server)
+     */
+    public void refreshRoomsListUI() {
         window.getHomeScreen().clearRoomListings();
-        rooms.get(RoomPrivacyPolicy.PUBLIC).forEach(r -> addRoomListing(r.getRoomID()));
+        publicRooms.keySet().forEach(this::addRoomListingToUI);
     }
 }

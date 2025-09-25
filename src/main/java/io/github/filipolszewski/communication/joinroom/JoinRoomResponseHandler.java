@@ -2,7 +2,6 @@ package io.github.filipolszewski.communication.joinroom;
 
 import io.github.filipolszewski.client.Client;
 import io.github.filipolszewski.communication.*;
-import io.github.filipolszewski.view.screens.ChatScreen;
 
 public class JoinRoomResponseHandler implements ResponseHandler {
     @Override
@@ -16,9 +15,11 @@ public class JoinRoomResponseHandler implements ResponseHandler {
 
         JoinRoomPayload payload = (JoinRoomPayload) response.payload();
 
+        // Display success dialog and change the screen
         window.displaySuccessDialog(response.message());
-        window.showScreen(ChatScreen.CHAT_SCREEN_KEY);
+        window.showChatScreen();
 
+        // Set current room ID for user on the client side
         client.getUser().setCurrentRoomID(payload.roomID());
     }
 }
