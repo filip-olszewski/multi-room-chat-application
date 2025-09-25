@@ -1,6 +1,7 @@
 package io.github.filipolszewski.client.handlers;
 
 import io.github.filipolszewski.client.Client;
+import io.github.filipolszewski.client.commands.impl.LoginCommand;
 import io.github.filipolszewski.communication.core.Payload;
 import io.github.filipolszewski.communication.core.Response;
 import io.github.filipolszewski.communication.core.ResponseHandler;
@@ -18,7 +19,7 @@ public class LoginResponseHandler implements ResponseHandler {
 
         if(!response.success()) {
             window.displayErrorDialog(response.message());
-            client.requestLogin();
+            client.getCommandRegistry().getNoArgs(LoginCommand.class).execute();
             return;
         }
 

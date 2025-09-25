@@ -87,7 +87,7 @@ public class Client {
         bindUIActions();
 
         // Try to log in
-        requestLogin();
+        commandRegistry.getNoArgs(LoginCommand.class).execute();
 
         // Fetch public rooms to rooms list
         commandRegistry.getParam(FetchRoomsCommand.class).execute(RoomPrivacyPolicy.PUBLIC);
@@ -134,35 +134,6 @@ public class Client {
         }).start();
     }
 
-    /**
-     * Handles initial logging in
-     * Prompts user for a username (userID) and sends a login request to the server
-     */
-    public void requestLogin() {
-        String username = window.promptInputDialog("Please input your username");
-
-        // Exit if canceled
-        if(username == null) System.exit(0);
-
-        // Repeat the prompt if empty
-        while(username.isEmpty()) {
-            window.displayErrorDialog("You need to specify your username to connect");
-            username = window.promptInputDialog("Please input your username");
-
-            // Check again if canceled
-            if(username == null) System.exit(0);
-        }
-
-        // Send login request
-        Request<LoginPayload> request = new Request<>(new LoginPayload(username));
-
-        try {
-            conn.send(request);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
 
     /**
      * Registers all the commands to the registry
@@ -174,6 +145,7 @@ public class Client {
         commandRegistry.register(LeaveRoomCommand.class, new LeaveRoomCommand(conn, window));
         commandRegistry.register(MessageCommand.class, new MessageCommand(conn, window));
         commandRegistry.register(FetchRoomsCommand.class, new FetchRoomsCommand(conn, window));
+        commandRegistry.register(LoginCommand.class, new LoginCommand(conn, window));
     }
 
 
