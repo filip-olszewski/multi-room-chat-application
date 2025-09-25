@@ -24,17 +24,19 @@ public class FetchRoomsResponseHandler implements ResponseHandler {
         // Get the payload
         FetchRoomsPayload payload = (FetchRoomsPayload) response.payload();
 
-        // Cast the rooms
-        List<Room> rooms = (List<Room>) payload.rooms();
-
-        // Put rooms in the correct privacy
-        client.getRooms().put(payload.privacy(), new ArrayList<>(rooms));
-
-
         // If privacy is public, add to the list
         if(payload.privacy() == RoomPrivacyPolicy.PUBLIC) {
+
+            // Clear the public room list
+            client.getPublicRooms().clear();
+
+            // Put rooms in the public rooms map
+            payload.rooms().forEach(room -> {
+                client.getPublicRooms().put(room.getRoomID(), room);
+            });
+
             // Update UI in swing's thread
-            SwingUtilities.invokeLater(client::refreshRoomsList);
+            SwingUtilities.invokeLater(client::refreshRoomsListUI);
         }
     }
 }

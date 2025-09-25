@@ -1,11 +1,7 @@
 package io.github.filipolszewski.communication.leaveroom;
 
-import com.sun.java.accessibility.util.AccessibilityListenerList;
 import io.github.filipolszewski.client.Client;
 import io.github.filipolszewski.communication.*;
-import io.github.filipolszewski.server.ClientHandler;
-import io.github.filipolszewski.view.AppWindow;
-import io.github.filipolszewski.view.screens.HomeScreen;
 
 public class LeaveRoomResponseHandler implements ResponseHandler {
     @Override
@@ -17,10 +13,12 @@ public class LeaveRoomResponseHandler implements ResponseHandler {
             return;
         }
 
+        // Clear chat, display success and change the screen
         window.getChatScreen().clearChat();
-        window.showScreen(HomeScreen.HOME_SCREEN_KEY);
         window.displaySuccessDialog(response.message());
+        window.showHomeScreen();
 
+        // Remove the room ID from the user on the client side
         client.getUser().setCurrentRoomID(null);
     }
 }

@@ -2,6 +2,8 @@ package io.github.filipolszewski.communication.createroom;
 
 import io.github.filipolszewski.client.Client;
 import io.github.filipolszewski.communication.*;
+import io.github.filipolszewski.constants.RoomPrivacyPolicy;
+import io.github.filipolszewski.model.room.Room;
 import io.github.filipolszewski.server.ClientHandler;
 import io.github.filipolszewski.view.screens.ChatScreen;
 
@@ -17,15 +19,24 @@ public class CreateRoomResponseHandler implements ResponseHandler {
             return;
         }
 
-        // Get payload
-        CreateRoomPayload payload = (CreateRoomPayload) response.payload();
+        // Get payload and other data
+        final CreateRoomPayload payload = (CreateRoomPayload) response.payload();
+        final String uid = client.getUser().getUserID();
+        final String roomID = payload.roomID();
+        final int capacity = payload.capacity();
+        final RoomPrivacyPolicy privacy = payload.privacy();
 
         // Display dialog
         window.displaySuccessDialog(response.message());
 
+        // Add room to public room map
+        if(privacy == RoomPrivacyPolicy.PUBLIC) {
+            client.getPublicRooms().put(roomID, new Room(roomID, uid, capacity, privacy));
+        }
+
         // Add room to UI
         SwingUtilities.invokeLater(() -> {
-            client.addRoomListing(payload.roomID());
+            client.addRoomListingToUI(roomID);
         });
     }
 }

@@ -28,15 +28,19 @@ public class AppWindow {
         mainPanel.add(chatScreen, ChatScreen.CHAT_SCREEN_KEY);
 
         frame.add(mainPanel);
-        showScreen(HomeScreen.HOME_SCREEN_KEY);
+        showHomeScreen();
     }
 
     public void showWindow() {
         frame.setVisible(true);
     }
 
-    public void showScreen(String screenKey) {
-        ((CardLayout) mainPanel.getLayout()).show(mainPanel, screenKey);
+    public void showChatScreen() {
+        ((CardLayout) mainPanel.getLayout()).show(mainPanel, ChatScreen.CHAT_SCREEN_KEY);
+    }
+
+    public void showHomeScreen() {
+        ((CardLayout) mainPanel.getLayout()).show(mainPanel, HomeScreen.HOME_SCREEN_KEY);
     }
 
     public String promptInputDialog(String message) {

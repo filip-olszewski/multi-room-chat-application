@@ -29,7 +29,7 @@ public class LoginResponseHandler implements ResponseHandler {
 
         // Show success message and redirect
         window.displaySuccessDialog(response.message());
-        window.showScreen(HomeScreen.HOME_SCREEN_KEY);
+        window.showHomeScreen();
 
         // Fetch public rooms to rooms list
         client.getCommandRegistry().getParam(FetchRoomsCommand.class).execute(RoomPrivacyPolicy.PUBLIC);
