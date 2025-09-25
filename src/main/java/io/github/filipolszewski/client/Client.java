@@ -228,9 +228,9 @@ public class Client {
      * Appends a direct join command
      * @param roomID    ID of the room associated with the listing
      */
-    public void addRoomListingToUI(String roomID) {
-        window.getHomeScreen().addRoomListing(roomID, e -> {
-            commandRegistry.getParam(JoinRoomCommand.class).execute(roomID);
+    public void addRoomListingToUI(Room room) {
+        window.getHomeScreen().addRoomListing(room, e -> {
+            commandRegistry.getParam(JoinRoomCommand.class).execute(room.getRoomID());
         });
     }
 
@@ -241,6 +241,6 @@ public class Client {
      */
     public void refreshRoomsListUI() {
         window.getHomeScreen().clearRoomListings();
-        publicRooms.keySet().forEach(this::addRoomListingToUI);
+        publicRooms.values().forEach(this::addRoomListingToUI);
     }
 }

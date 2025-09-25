@@ -92,11 +92,7 @@ public class ClientHandler implements Runnable {
 
                 // Handle the request
                 var response = handler.handle(request, this);
-
-                // Log based on response success
-                if(response.success())
-                    log.info("Request has been handled successfully! Responding: " + response);
-                else log.info("Failed to handle request successfully! Responding: " + response);
+                log.info("Request has been handled successfully! Responding: " + response);
 
                 // Send back the response
                 conn.send(response);

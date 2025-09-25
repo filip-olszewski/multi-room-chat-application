@@ -1,5 +1,6 @@
 package io.github.filipolszewski.view.screens;
 
+import io.github.filipolszewski.model.room.Room;
 import io.github.filipolszewski.view.components.RoomListing;
 
 import javax.swing.*;
@@ -64,8 +65,8 @@ public class HomeScreen extends JPanel {
         roomListPanel.repaint();
     }
 
-    public void addRoomListing(String roomID, ActionListener actionListener) {
-        RoomListing roomListing = new RoomListing(roomID);
+    public void addRoomListing(Room room, ActionListener actionListener) {
+        RoomListing roomListing = new RoomListing(room);
 
         roomListing.getJoinButton().addActionListener(actionListener);
 

@@ -29,14 +29,16 @@ public class CreateRoomResponseHandler implements ResponseHandler {
         // Display dialog
         window.displaySuccessDialog(response.message());
 
+        Room room = new Room(roomID, uid, capacity, privacy);
+
         // Add room to public room map
         if(privacy == RoomPrivacyPolicy.PUBLIC) {
-            client.getPublicRooms().put(roomID, new Room(roomID, uid, capacity, privacy));
+            client.getPublicRooms().put(roomID, room);
         }
 
         // Add room to UI
         SwingUtilities.invokeLater(() -> {
-            client.addRoomListingToUI(roomID);
+            client.addRoomListingToUI(room);
         });
     }
 }
