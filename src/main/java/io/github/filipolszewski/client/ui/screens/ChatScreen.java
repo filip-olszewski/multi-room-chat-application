@@ -1,5 +1,8 @@
 package io.github.filipolszewski.client.ui.screens;
 
+import io.github.filipolszewski.dto.RoomDTO;
+import io.github.filipolszewski.model.room.Room;
+
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
@@ -10,10 +13,12 @@ import java.awt.event.ComponentEvent;
 public class ChatScreen extends JPanel {
     public final static String CHAT_SCREEN_KEY = "CHAT";
 
+    private JLabel roomName;
     private final JTextArea textArea;
     private final JTextField input;
     private final JButton sendButton;
     private final JButton leaveButton;
+    private RoomDTO roomDTO;
 
     public ChatScreen() {
         setLayout(new BorderLayout());
@@ -48,9 +53,19 @@ public class ChatScreen extends JPanel {
         JToolBar toolbar = new JToolBar();
         toolbar.add(leaveButton);
 
-        add(toolbar, BorderLayout.NORTH);
+        JPanel upperPanel = new JPanel(new BorderLayout());
+        upperPanel.add(toolbar, BorderLayout.WEST);
+        roomName = new JLabel();
+        upperPanel.add(roomName, BorderLayout.CENTER);
+
+        add(upperPanel, BorderLayout.NORTH);
         add(scrollPane, BorderLayout.CENTER);
         add(bottomPanel, BorderLayout.SOUTH);
+    }
+
+    public void setRoom(RoomDTO dto) {
+        roomDTO = dto;
+        roomName.setText(dto.roomID());
     }
 
     public void addLeaveButtonListener(ActionListener actionListener) {

@@ -5,6 +5,7 @@ import io.github.filipolszewski.constants.WindowConfig;
 import io.github.filipolszewski.client.ui.components.CreateRoomDialog;
 import io.github.filipolszewski.client.ui.screens.ChatScreen;
 import io.github.filipolszewski.client.ui.screens.HomeScreen;
+import io.github.filipolszewski.dto.RoomDTO;
 import lombok.Getter;
 
 import javax.swing.*;
@@ -37,8 +38,9 @@ public class AppWindow {
         frame.setVisible(true);
     }
 
-    public void showChatScreen() {
+    public void showChatScreen(RoomDTO roomDTO) {
         ((CardLayout) mainPanel.getLayout()).show(mainPanel, ChatScreen.CHAT_SCREEN_KEY);
+        chatScreen.setRoom(roomDTO);
     }
 
     public void showHomeScreen() {

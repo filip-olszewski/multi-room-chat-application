@@ -15,10 +15,10 @@ public class LeaveRoomResponseHandler implements ResponseHandler {
             return;
         }
 
-        // Clear chat, display success and change the screen
+        // Clear chat, change the screen and display success
         window.getChatScreen().clearChat();
-        window.displaySuccessDialog(response.message());
         window.showHomeScreen();
+        window.displaySuccessDialog(response.message());
 
         // Remove the room ID from the user on the client side
         client.getUser().setCurrentRoomID(null);

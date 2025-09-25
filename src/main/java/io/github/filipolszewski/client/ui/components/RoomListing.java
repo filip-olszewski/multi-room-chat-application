@@ -5,6 +5,8 @@ import io.github.filipolszewski.model.room.Room;
 import lombok.Getter;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import java.awt.*;
 
 public class RoomListing extends JPanel {
     private final JLabel roomIdLabel;
@@ -14,6 +16,9 @@ public class RoomListing extends JPanel {
     private final JButton joinButton;
 
     public RoomListing(RoomDTO room) {
+        setLayout(new BorderLayout());
+        setBorder(new EmptyBorder(5, 10, 5, 5));
+
         roomIdLabel = new JLabel(room.roomID());
 
         String activeUsersStr = Integer.toString(room.activeUsers().size());
@@ -22,8 +27,22 @@ public class RoomListing extends JPanel {
 
         joinButton = new JButton("Join room");
 
-        add(roomIdLabel);
-        add(activeUsers);
-        add(joinButton);
+        JPanel rightSideGroup = new JPanel();
+        rightSideGroup.setOpaque(false);
+        rightSideGroup.add(activeUsers);
+        rightSideGroup.add(Box.createHorizontalStrut(10));
+        rightSideGroup.add(joinButton);
+
+        add(roomIdLabel, BorderLayout.WEST);
+        add(rightSideGroup, BorderLayout.EAST);
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+
+        Graphics2D g2d = (Graphics2D) g;
+        g2d.setColor(new Color(220, 220, 220));
+        g2d.fillRoundRect(0, 0, getSize().width, getSize().height, 10, 10);
     }
 }

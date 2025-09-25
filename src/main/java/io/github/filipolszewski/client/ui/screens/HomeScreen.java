@@ -5,6 +5,7 @@ import io.github.filipolszewski.model.room.Room;
 import io.github.filipolszewski.client.ui.components.RoomListing;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.ActionListener;
 
@@ -33,8 +34,8 @@ public class HomeScreen extends JPanel {
         toolBar.add(refreshButton);
 
         roomListPanel = new JPanel();
-        BoxLayout boxLayout = new BoxLayout(roomListPanel, BoxLayout.Y_AXIS);
-        roomListPanel.setLayout(boxLayout);
+        roomListPanel.setLayout(new BoxLayout(roomListPanel, BoxLayout.Y_AXIS));
+        roomListPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
 
         JScrollPane scrollPane = new JScrollPane(roomListPanel);
 
@@ -68,6 +69,9 @@ public class HomeScreen extends JPanel {
         RoomListing roomListing = new RoomListing(room);
 
         roomListing.getJoinButton().addActionListener(actionListener);
+
+        roomListPanel.add(Box.createVerticalStrut(5));
+        roomListing.setMaximumSize(new Dimension(Integer.MAX_VALUE, roomListing.getPreferredSize().height));
 
         roomListPanel.add(roomListing);
     }
