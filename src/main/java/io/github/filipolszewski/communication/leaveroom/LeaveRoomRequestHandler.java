@@ -4,6 +4,8 @@ import io.github.filipolszewski.communication.Payload;
 import io.github.filipolszewski.communication.Request;
 import io.github.filipolszewski.communication.RequestHandler;
 import io.github.filipolszewski.communication.Response;
+import io.github.filipolszewski.communication.deleteroom.DeleteRoomPayload;
+import io.github.filipolszewski.constants.status.room.LeaveRoomStatus;
 import io.github.filipolszewski.model.user.User;
 import io.github.filipolszewski.server.ClientHandler;
 import lombok.extern.java.Log;
@@ -31,19 +33,34 @@ public class LeaveRoomRequestHandler implements RequestHandler {
         final String roomID = user.getCurrentRoomID();
 
         // Leave the room
-        clientHandler.getRoomManager().leaveRoom(roomID, uid);
+        LeaveRoomStatus status = clientHandler.getRoomManager().leaveRoom(roomID, uid);
+        
+        switch(status) {
+            case SUCCESS -> {
+                // Clear the room user is currently in
+                user.setCurrentRoomID(null);
 
-        // Clear the room user is currently in
-        user.setCurrentRoomID(null);
+                // Broadcast leaving the room
+                try {
+                    clientHandler.getServer().broadcastRoom(roomID, uid + " has left the room");
+                } catch (IOException e) {
+                    log.severe("Could not broadcast the message");
+                }
 
-        // Broadcast leaving the room
-        try {
-            clientHandler.getServer().broadcastRoom(roomID, uid + " has left the room");
-        } catch (IOException e) {
-            log.severe("Could not broadcast the message");
+                // Send back success
+                return new Response<>("Left the room \"" + roomID + "\".", payload);
+            }
+            case ROOM_NOT_FOUND -> {
+                return failure(payload, roomID, "Room does not exist!");
+            }
+            case USER_NOT_IN_ROOM -> {
+                return failure(payload, roomID, "You are not joined to any rooms!");
+            }
+            default -> throw new IllegalStateException("Unexpected value: " + status);
         }
+    }
 
-        // Send back success
-        return new Response<>("Left the room " + roomID, payload);
+    private Response<LeaveRoomPayload> failure(LeaveRoomPayload payload, String roomID, String reason) {
+        return new Response<>(false, "Failed to leave the room \"" + roomID + "\". " + reason, payload);
     }
 }

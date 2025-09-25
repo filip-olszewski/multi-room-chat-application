@@ -21,7 +21,7 @@ public class LoginRequestHandler implements RequestHandler {
 
         // Check if user is already in the clients map
         if(server.getClientHandler(uid) != null) {
-            return new Response<>(false, "User " + uid + " is already logged in!", payload);
+            return new Response<>(false, "User \"" + uid + "\" already exists!", payload);
         }
 
         // Get user from user manager
@@ -29,7 +29,7 @@ public class LoginRequestHandler implements RequestHandler {
 
         // If user does not exist create new user
         if (user == null) {
-            return new Response<>(false, "Failed to log in user " + uid, payload);
+            return new Response<>(false, "Failed to log in user \"" + uid + "\".", payload);
         }
 
         // Add clientHandler to the map
@@ -41,6 +41,6 @@ public class LoginRequestHandler implements RequestHandler {
         // Set id of current user clientHandler is handling
         clientHandler.setUserID(uid);
 
-        return new Response<>("Successfully logged in as " + uid, payload);
+        return new Response<>("Successfully logged in as \"" + uid + "\".", payload);
     }
 }

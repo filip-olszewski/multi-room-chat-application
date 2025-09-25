@@ -22,6 +22,6 @@ public class FetchRoomsRequestHandler implements RequestHandler {
         final FetchRoomsPayload newPayload = new FetchRoomsPayload(rooms, payload.privacy());
 
         // Return a new successful response containing all the rooms
-        return new Response<>("Successfully retrieved all public rooms", newPayload);
+        return new Response<>("Successfully retrieved all public rooms.", newPayload);
     }
 }

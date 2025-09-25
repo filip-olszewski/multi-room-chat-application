@@ -65,7 +65,7 @@ public class Room implements Serializable {
         return activeUsers.add(userID);
     }
 
-    public synchronized void leaveRoom(String userID) {
-        activeUsers.remove(userID);
+    public synchronized boolean leaveRoom(String userID) {
+        return activeUsers.remove(userID);
     }
 }

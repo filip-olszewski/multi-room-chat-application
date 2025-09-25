@@ -4,6 +4,7 @@ import io.github.filipolszewski.communication.Payload;
 import io.github.filipolszewski.communication.Request;
 import io.github.filipolszewski.communication.RequestHandler;
 import io.github.filipolszewski.communication.Response;
+import io.github.filipolszewski.constants.status.room.CreateRoomStatus;
 import io.github.filipolszewski.server.ClientHandler;
 import io.github.filipolszewski.server.managers.RoomManager;
 
@@ -19,22 +20,25 @@ public class CreateRoomRequestHandler implements RequestHandler {
         // Fail if user not registered
         if(uid == null) {
             return new Response<>(false,
-                    "Failure. You need to be logged in to create a room",
+                    "Failure. You need to be logged in to create a new room!",
                     payload);
         }
 
         // Check room availability
-        boolean ok = rm.createRoom(payload.roomID(), uid, payload.capacity(), payload.privacy());
+        CreateRoomStatus status = rm.createRoom(payload.roomID(), uid, payload.capacity(), payload.privacy());
 
         // If ok then send back success, else send failure
-        if(ok) {
-            clientHandler.getUserManager().getUser(uid).setCurrentRoomID(payload.roomID());
-            return new Response<>("Successfully created new room " + payload.roomID(), payload);
-        }
-        else {
-            return new Response<>(false,
-                    "Failed to create the room. Room with this ID already exists!",
-                    payload);
+        switch(status) {
+            case SUCCESS -> {
+                clientHandler.getUserManager().getUser(uid).setCurrentRoomID(payload.roomID());
+                return new Response<>("Successfully created new room \"" + payload.roomID() + "\".", payload);
+            }
+            case ALREADY_EXISTS -> {
+                return new Response<>(false,
+                        "Failed to create the room. Room with this ID already exists!",
+                        payload);
+            }
+            default -> throw new IllegalStateException("Unexpected value: " + status);
         }
     }
 }

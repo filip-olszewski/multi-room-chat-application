@@ -1,5 +1,6 @@
 package io.github.filipolszewski.server.managers;
 
+import io.github.filipolszewski.constants.status.room.*;
 import io.github.filipolszewski.model.room.Room;
 import io.github.filipolszewski.constants.RoomPrivacyPolicy;
 
@@ -15,51 +16,63 @@ public class RoomManager {
         rooms = new ConcurrentHashMap<>();
     }
 
-    public boolean createRoom(String roomID, String adminID, int capacity, RoomPrivacyPolicy privacy) {
-        return rooms.putIfAbsent(roomID, new Room(roomID, adminID, capacity, privacy)) == null;
+    public CreateRoomStatus createRoom(String roomID, String adminID, int capacity, RoomPrivacyPolicy privacy) {
+        return rooms.putIfAbsent(roomID, new Room(roomID, adminID, capacity, privacy)) == null
+                ? CreateRoomStatus.SUCCESS
+                : CreateRoomStatus.ALREADY_EXISTS;
     }
 
-    public synchronized boolean createAndJoinRoom(String roomID, String adminID, int capacity, RoomPrivacyPolicy privacy) {
+    public synchronized CreateAndJoinRoomStatus createAndJoinRoom(
+            String roomID, String adminID, int capacity, RoomPrivacyPolicy privacy) {
+
+        if (rooms.containsKey(roomID)) {
+            return CreateAndJoinRoomStatus.ALREADY_EXISTS;
+        }
+
         Room room = new Room(roomID, adminID, capacity, privacy);
-
-        if(rooms.containsKey(roomID)) return false;
-
         rooms.put(roomID, room);
-        return room.joinRoom(adminID);
+
+        return room.joinRoom(adminID)
+                ? CreateAndJoinRoomStatus.SUCCESS
+                : CreateAndJoinRoomStatus.JOIN_FAILED;
     }
 
-    /**
-     * Removes a room from the room list
-     * @param roomID    ID of the room to be deleted
-     * @return          True if successfully removed, false otherwise
-     */
-    public boolean removeRoom(String roomID, String userID) {
+    public RemoveRoomStatus removeRoom(String roomID, String userID) {
         Room room = rooms.get(roomID);
 
-        if(room == null) return false;
+        if(room == null) return RemoveRoomStatus.ROOM_NOT_FOUND;
 
         synchronized (room) {
-            if(room.isAdmin(userID) && room.isEmpty()) {
-                return rooms.remove(roomID, room);
+            if(!room.isAdmin(userID)) {
+                return RemoveRoomStatus.NOT_ADMIN;
+            }
+            if(!room.isEmpty()) {
+                return RemoveRoomStatus.NOT_EMPTY;
+            }
+            if(rooms.remove(roomID, room)) {
+                return RemoveRoomStatus.SUCCESS;
             }
         }
 
-        return false;
+        return RemoveRoomStatus.ROOM_NOT_FOUND;
     }
 
-    public boolean joinRoom(String roomID, String userID) {
+    public JoinRoomStatus joinRoom(String roomID, String userID) {
         Room room = rooms.get(roomID);
-        if(room != null) {
-            return room.joinRoom(userID);
-        }
-        return false;
+
+        if(room == null) return JoinRoomStatus.ROOM_NOT_FOUND;
+        if(!room.joinRoom(userID)) return JoinRoomStatus.FULL;
+
+        return JoinRoomStatus.SUCCESS;
     }
 
-    public void leaveRoom(String roomID, String userID) {
+    public LeaveRoomStatus leaveRoom(String roomID, String userID) {
         Room room = rooms.get(roomID);
-        if(room != null) {
-            room.leaveRoom(userID);
-        }
+
+        if(room == null) return LeaveRoomStatus.ROOM_NOT_FOUND;
+        if (!room.leaveRoom(userID)) return LeaveRoomStatus.USER_NOT_IN_ROOM;
+
+        return LeaveRoomStatus.SUCCESS;
     }
 
     public Room getRoom(String roomID) {
