@@ -5,6 +5,7 @@ import io.github.filipolszewski.communication.core.Response;
 import io.github.filipolszewski.communication.payloads.MessagePayload;
 import io.github.filipolszewski.communication.payloads.RoomUpdatePayload;
 import io.github.filipolszewski.constants.AppConfig;
+import io.github.filipolszewski.constants.RoomPrivacyPolicy;
 import io.github.filipolszewski.server.events.*;
 import io.github.filipolszewski.server.events.impl.RoomCreatedEvent;
 import io.github.filipolszewski.server.events.impl.RoomDeletedEvent;
@@ -35,21 +36,27 @@ public class Server {
 
         eventBus.registerEvent(RoomCreatedEvent.class, e -> {
             try {
-                broadcastAll(new Response<>("", new RoomUpdatePayload(e.room(), RoomUpdateType.CREATE)));
+                if(e.room().privacy() == RoomPrivacyPolicy.PUBLIC) {
+                    broadcastAll(new Response<>("", new RoomUpdatePayload(e.room(), RoomUpdateType.CREATE)));
+                }
             } catch (IOException ex) {
                 throw new RuntimeException(ex);
             }
         });
         eventBus.registerEvent(RoomModifiedEvent.class, e -> {
             try {
-                broadcastAll(new Response<>("", new RoomUpdatePayload(e.room(), RoomUpdateType.MODIFY)));
+                if(e.room().privacy() == RoomPrivacyPolicy.PUBLIC) {
+                    broadcastAll(new Response<>("", new RoomUpdatePayload(e.room(), RoomUpdateType.MODIFY)));
+                }
             } catch (IOException ex) {
                 throw new RuntimeException(ex);
             }
         });
         eventBus.registerEvent(RoomDeletedEvent.class, e -> {
             try {
-                broadcastAll(new Response<>("", new RoomUpdatePayload(e.room(), RoomUpdateType.DELETE)));
+                if(e.room().privacy() == RoomPrivacyPolicy.PUBLIC) {
+                    broadcastAll(new Response<>("", new RoomUpdatePayload(e.room(), RoomUpdateType.DELETE)));
+                }
             } catch (IOException ex) {
                 throw new RuntimeException(ex);
             }
