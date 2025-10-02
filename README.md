@@ -112,7 +112,6 @@ Follow these steps to set up and run the project locally.
     java -version
     mvn -version
     ```
----
 
 ### 2. Clone the Repository
 Clone the project from GitHub:  
@@ -140,6 +139,8 @@ In another terminal window, run the client:
 ```bash
 mvn exec:java -Dexec.mainClass="io.github.filipolszewski.client.ClientStarter"
 ```
+
+---
 
 ## Project Structure
 ```bash
@@ -182,6 +183,7 @@ mvn exec:java -Dexec.mainClass="io.github.filipolszewski.client.ClientStarter"
 /util/mappers
   └── RoomMapper.java
 ```
+---
 
 ## Usage Example  
 
@@ -225,12 +227,16 @@ mvn exec:java -Dexec.mainClass="io.github.filipolszewski.client.ClientStarter"
 - Only the **room admin** can delete a room.  
 - A room **cannot** be deleted if there are still users inside.  
 
+---
+
 ## Key Highlights
 - Uses TCP sockets with object serialization for request/response communication.
 - Employs Command pattern for client actions.
 - Implements Event-driven design on the server side to notify all clients about state changes.
 - Ensures thread safety in room management using synchronization and concurrent data structures.
 - Built with modular, extensible architecture for future feature additions (authentication, private messages, etc.).
+
+---
 
 ## License
 
