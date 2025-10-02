@@ -1,24 +1,28 @@
 # Multi-Chat Room Application over TCP  
 
-## Table of Contents  
-1. [Overview](#overview)  
-2. [Features](#features)  
-   - [Client-Side](#client-side)  
-   - [Server-Side](#server-side)  
-   - [Communication](#communication)  
-3. [Architecture](#architecture)  
-   - [Client](#client)  
-   - [Server](#server)  
-   - [Data Models](#data-models)  
-4. [Getting Started](#getting-started)  
-   - [Requirements](#requirements)  
-   - [Running the Server](#running-the-server)  
-   - [Running the Client](#running-the-client)  
-5. [Project Structure](#project-structure)  
-6. [Usage Example](#usage-example)  
-7. [Room Rules](#room-rules)  
-8. [Key Highlights](#key-highlights)  
+## Table of Contents
+1. [Overview](#overview)
+2. [Features](#features)
+    - [Client-Side](#client-side)
+    - [Server-Side](#server-side)
+    - [Communication](#communication)
+3. [Architecture](#architecture)
+    - [Client](#client)
+    - [Server](#server)
+    - [Data Models](#data-models)
+4. [Getting Started](#getting-started)
+    - [Prerequisites](#1-prerequisites)
+    - [Clone the Repository](#2-clone-the-repository)
+    - [Build with Maven](#3-build-with-maven)
+    - [Run the Server](#4-run-the-server)
+    - [Run the Client](#5-run-the-client)
+5. [Project Structure](#project-structure)
+6. [Usage Example](#usage-example)
+7. [Room Rules](#room-rules)
+8. [Key Highlights](#key-highlights)
 9. [License](#license)
+
+---
 
 ## Overview  
 This project is a client-server chat application built using **Java sockets over TCP**. It allows multiple users to connect to a central server, create and join chat rooms, send messages, and manage room privacy policies.  
@@ -100,7 +104,7 @@ Follow these steps to set up and run the project locally.
 
 ---
 
-### 1. Prerequisites  
+### 1. Prerequisites
 - **Java 21 or higher** (required for virtual threads).  
 - **Maven** installed and available in your system path.  
   - Verify with:  
@@ -110,7 +114,7 @@ Follow these steps to set up and run the project locally.
     ```
 ---
 
-### 2. Clone the Repository  
+### 2. Clone the Repository
 Clone the project from GitHub:  
 ```bash
 git clone https://github.com/filip-olszewski/multi-room-chat-application.git
